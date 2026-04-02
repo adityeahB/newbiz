@@ -1,88 +1,195 @@
-html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Business Plan Builder</title>
-    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+    <title>AIRO Business Plan Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Override Tailwind theme to match Grantify.io style -->
     <style>
-        body { font-family: 'DM Sans', sans-serif; background: #f4f7f6; }
-        h1, h2, h3, .serif { font-family: 'Lora', serif; }
+        :root {
+            --primary: #4F46E5;  /* Indigo */
+            --primary-dark: #4338CA;
+            --secondary: #10B981; /* Emerald */
+            --accent: #F59E0B;
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #F9FAFB;
+        }
+        h1, h2, h3, .serif {
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+        }
         input, select, textarea {
-            border-radius: 0.625rem; border: 1.5px solid #d1d5db;
-            padding: 0.5rem 0.75rem; width: 100%; font-family: 'DM Sans', sans-serif;
-            font-size: 0.95rem; background: #fff; transition: border-color 0.15s;
+            border-radius: 0.75rem;
+            border: 1px solid #E5E7EB;
+            padding: 0.625rem 0.875rem;
+            width: 100%;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            background: #FFFFFF;
+            transition: all 0.2s;
         }
         input:focus, select:focus, textarea:focus {
-            outline: none; border-color: #b8902e;
-            box-shadow: 0 0 0 3px rgba(184,144,46,0.15);
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
         }
         .radio-card {
-            border: 1.5px solid #e5e7eb; border-radius: 0.75rem;
-            padding: 0.6rem 1rem; cursor: pointer; transition: all 0.15s;
-            font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem;
+            border: 1px solid #E5E7EB;
+            border-radius: 0.75rem;
+            padding: 0.6rem 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: white;
         }
-        .radio-card.selected { border-color: #0e3c3e; background: #eef7f7; color: #0e3c3e; font-weight: 500; }
+        .radio-card.selected {
+            border-color: var(--primary);
+            background: #EEF2FF;
+            color: var(--primary);
+            font-weight: 500;
+        }
         .check-chip {
-            border: 1.5px solid #e5e7eb; border-radius: 2rem;
-            padding: 0.35rem 0.85rem; cursor: pointer; transition: all 0.15s;
-            font-size: 0.88rem; display: flex; align-items: center; gap: 0.4rem;
+            border: 1px solid #E5E7EB;
+            border-radius: 2rem;
+            padding: 0.35rem 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: white;
+            font-weight: 500;
         }
-        .check-chip.selected { border-color: #0e3c3e; background: #eef7f7; color: #0e3c3e; font-weight: 500; }
+        .check-chip.selected {
+            border-color: var(--primary);
+            background: #EEF2FF;
+            color: var(--primary);
+        }
+        .check-chip:focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
         .fact-bar {
-            background: linear-gradient(90deg, #fffbea 0%, #fef3c7 100%);
-            border-left: 4px solid #b8902e; border-radius: 0 0.75rem 0.75rem 0;
+            background: linear-gradient(90deg, #FEF3C7 0%, #FFFBEB 100%);
+            border-left: 4px solid var(--accent);
+            border-radius: 0 0.75rem 0.75rem 0;
         }
-        @keyframes fadein { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes fadein {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
         .fade-in { animation: fadein 0.35s ease; }
         .step-pill {
-            padding: 0.35rem 1rem; border-radius: 2rem; font-size: 0.82rem;
-            font-weight: 500; cursor: pointer; white-space: nowrap; transition: all 0.15s;
+            padding: 0.35rem 1.25rem;
+            border-radius: 2rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #F3F4F6;
+            color: #4B5563;
         }
-        .step-pill.active { background: #0e3c3e; color: #fff; }
-        .step-pill.done { background: #d1fae5; color: #065f46; }
-        .step-pill.inactive { background: #e5e7eb; color: #6b7280; }
-        table { border-collapse: collapse; width: 100%; font-size: 0.82rem; }
-        th { background: #f0f4f4; color: #374151; padding: 0.5rem 0.6rem; text-align: right; font-weight: 600; }
+        .step-pill.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 2px 6px rgba(79,70,229,0.3);
+        }
+        .step-pill.done {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+        .step-pill.inactive {
+            background: #F3F4F6;
+            color: #9CA3AF;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 0.8rem;
+        }
+        th {
+            background: #F3F4F6;
+            color: #1F2937;
+            padding: 0.6rem 0.75rem;
+            text-align: right;
+            font-weight: 600;
+        }
         th:first-child { text-align: left; }
-        td { padding: 0.45rem 0.6rem; border-bottom: 1px solid #f3f4f6; text-align: right; }
-        td:first-child { text-align: left; font-weight: 500; color: #0e3c3e; }
-        tr:last-child td { border-bottom: none; }
-        .num-pos { color: #065f46; }
-        .num-neg { color: #be123c; }
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; }
-        ::-webkit-scrollbar-thumb { background: #b8902e44; border-radius: 10px; }
+        td {
+            padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid #F3F4F6;
+            text-align: right;
+        }
+        td:first-child { text-align: left; font-weight: 500; color: #1F2937; }
+        .num-pos { color: #10B981; font-weight: 500; }
+        .num-neg { color: #EF4444; }
+        .btn-primary {
+            background: var(--primary);
+            transition: all 0.2s;
+        }
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+        .btn-secondary {
+            background: white;
+            border: 1px solid #E5E7EB;
+            color: #374151;
+        }
+        .btn-secondary:hover {
+            background: #F9FAFB;
+            border-color: var(--primary);
+        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #F1F5F9; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-hover {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -12px rgba(0,0,0,0.1);
+        }
     </style>
 </head>
 <body>
 <div id="root">
-    <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:'DM Sans',sans-serif;color:#6b7280;">
+    <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:'Inter',sans-serif;color:#6b7280;">
         Loading…
     </div>
 </div>
 
-<!-- Load React 18 UMD (most reliable) -->
+<!-- React & Dependencies -->
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<!-- Babel -->
+<!-- Babel (for development; precompile for production) -->
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-<!-- pdfMake -->
+<!-- pdfMake with custom font registration to avoid warnings -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
 
 <script type="text/babel">
 const { useState, useEffect, useContext, createContext, useCallback } = React;
 
-// ─── TRANSLATIONS ─────────────────────────────────────────────────────────────
+// ─── TRANSLATIONS (updated branding) ─────────────────────────────────────────
 const TRANS = {
   en: {
-    appTitle:"Business Plan Builder", tagline:"Bank-Ready in 5 Steps",
-    gdpr:"No cookies. Progress saved locally on your device only.",
+    appTitle:"AIRO Business Plan Generator", tagline:"Grant-Ready in 5 Steps",
+    gdpr:"No cookies. Progress saved locally on your device.",
     gotIt:"Got it", progress:"Your progress",
-    next:"Next →", prev:"← Back", genPDF:"📄 Generate PDF Report",
+    next:"Next →", prev:"← Back", genPDF:"📄 Generate Grant-Ready PDF",
     s1:"Foundations", s2:"Market", s3:"Financials", s4:"Scorecard", s5:"Risk",
     bName:"Business / Company name", legalStr:"Legal structure",
     lo1:"Sole Proprietorship", lo2:"Lda. (Ltd.)", lo3:"S.A.",
@@ -124,12 +231,13 @@ const TRANS = {
     fact4:"🚀 Portuguese startups raised €1.2B in venture capital in 2023",
     fact5:"🌱 Agro-tech grants in Portugal can cover up to 60% of investment",
     fact6:"🏦 Mutual Guarantee Societies help SMEs access better loan terms",
+    resources:"📁 Grant Resources & Templates",
   },
   pt: {
-    appTitle:"Criador de Plano de Negócios", tagline:"Pronto para o banco em 5 passos",
-    gdpr:"Sem cookies. Progresso guardado só no seu dispositivo.",
-    gotIt:"Ok, entendido", progress:"O seu progresso",
-    next:"Seguinte →", prev:"← Anterior", genPDF:"📄 Gerar Relatório PDF",
+    appTitle:"Gerador de Plano de Negócios AIRO", tagline:"Pronto para Candidaturas em 5 Passos",
+    gdpr:"Sem cookies. Progresso guardado localmente.",
+    gotIt:"Ok", progress:"Progresso",
+    next:"Seguinte →", prev:"← Anterior", genPDF:"📄 Gerar PDF para Candidatura",
     s1:"Fundamentos", s2:"Mercado", s3:"Finanças", s4:"Scorecard", s5:"Risco",
     bName:"Nome da empresa", legalStr:"Forma jurídica",
     lo1:"Empresário em Nome Individual", lo2:"Lda.", lo3:"S.A.",
@@ -171,6 +279,7 @@ const TRANS = {
     fact4:"🚀 Startups portuguesas captaram €1,2B em 2023",
     fact5:"🌱 Apoios agro-tech até 60% do investimento",
     fact6:"🏦 Sociedades de Garantia Mútua facilitam crédito às PME",
+    resources:"📁 Recursos e Modelos de Candidatura",
   }
 };
 
@@ -197,7 +306,7 @@ const DEFAULTS = {
 };
 
 function loadData() {
-  try { const s = localStorage.getItem('bpb_v2'); return s ? {...DEFAULTS,...JSON.parse(s)} : {...DEFAULTS}; }
+  try { const s = localStorage.getItem('airo_bpb_v2'); return s ? {...DEFAULTS,...JSON.parse(s)} : {...DEFAULTS}; }
   catch { return {...DEFAULTS}; }
 }
 
@@ -232,14 +341,14 @@ function calcPL(d) {
 const FieldLabel = ({ k, tip }) => {
   const { t } = useLang();
   return (
-    <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+    <label className="block text-sm font-semibold text-gray-800 mb-1.5">
       {t(k)}
-      {tip && <span title={t(tip)} className="ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full bg-amber-100 text-amber-700 text-[10px] cursor-help">i</span>}
+      {tip && <span title={t(tip)} className="ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full bg-indigo-100 text-indigo-700 text-[10px] cursor-help">i</span>}
     </label>
   );
 };
 
-// ─── SECTION 1 ────────────────────────────────────────────────────────────────
+// ─── SECTION 1 (with improved accessibility for check-chips) ─────────────────
 function Sec1() {
   const { t } = useLang();
   const { d, upd } = useData();
@@ -263,8 +372,7 @@ function Sec1() {
             </label>
           ))}
         </div>
-        <a href="https://info.portaldasfinancas.gov.pt" target="_blank" rel="noreferrer"
-           className="text-xs text-amber-700 underline mt-1 inline-block">↗ Portal das Finanças — more info</a>
+        <a href="https://info.portaldasfinancas.gov.pt" target="_blank" rel="noreferrer" className="text-xs text-indigo-600 underline mt-1 inline-block">↗ Portal das Finanças</a>
       </div>
       <div>
         <FieldLabel k="mission" />
@@ -280,12 +388,19 @@ function Sec1() {
           {valOpts.map(v=>{
             const sel = (d.values||[]).includes(v);
             return (
-              <label key={v} className={cls('check-chip', sel&&'selected')} onClick={()=>{
-                const arr = d.values||[];
-                upd('values', sel ? arr.filter(x=>x!==v) : [...arr,v]);
-              }}>
+              <button
+                key={v}
+                type="button"
+                role="switch"
+                aria-checked={sel}
+                onClick={()=>{
+                  const arr = d.values||[];
+                  upd('values', sel ? arr.filter(x=>x!==v) : [...arr,v]);
+                }}
+                className={cls('check-chip', sel&&'selected')}
+              >
                 {sel ? '✓ ' : ''}{t(v)}
-              </label>
+              </button>
             );
           })}
         </div>
@@ -305,341 +420,137 @@ function Sec1() {
   );
 }
 
-// ─── SECTION 2 ────────────────────────────────────────────────────────────────
+// ─── SECTION 2,3,4,5 (similar but using buttons for consistency? Keep as is for brevity) ──
 function Sec2() {
   const { t } = useLang();
   const { d, upd } = useData();
   return (
     <div className="space-y-6 fade-in">
-      <div>
-        <FieldLabel k="pestelQ" />
-        <select value={d.pestel} onChange={e=>upd('pestel',e.target.value)}>
-          {['p1','p2','p3','p4'].map(o=><option key={o} value={o}>{t(o)}</option>)}
-        </select>
-      </div>
-      <div>
-        <FieldLabel k="porterQ" />
-        <div className="flex gap-2 flex-wrap mt-1">
-          {['f1','f2','f3'].map(o=>(
-            <label key={o} className={cls('radio-card flex-1', d.porter===o&&'selected')}>
-              <input type="radio" name="porter" checked={d.porter===o} onChange={()=>upd('porter',o)} className="sr-only" />
-              {t(o)}
-            </label>
-          ))}
-        </div>
-      </div>
+      <div><FieldLabel k="pestelQ" /><select value={d.pestel} onChange={e=>upd('pestel',e.target.value)}>{['p1','p2','p3','p4'].map(o=><option key={o} value={o}>{t(o)}</option>)}</select></div>
+      <div><FieldLabel k="porterQ" /><div className="flex gap-2 flex-wrap mt-1">{['f1','f2','f3'].map(o=>(<label key={o} className={cls('radio-card flex-1', d.porter===o&&'selected')}><input type="radio" name="porter" checked={d.porter===o} onChange={()=>upd('porter',o)} className="sr-only" />{t(o)}</label>))}</div></div>
       <div><FieldLabel k="bmcVal" /><textarea rows={2} value={d.bmcVal} onChange={e=>upd('bmcVal',e.target.value)} /></div>
       <div><FieldLabel k="bmcCh"  /><input value={d.bmcCh}  onChange={e=>upd('bmcCh',e.target.value)} /></div>
       <div><FieldLabel k="mktMix"/><input value={d.mktMix} onChange={e=>upd('mktMix',e.target.value)} /></div>
     </div>
   );
 }
-
-// ─── SECTION 3 ────────────────────────────────────────────────────────────────
 function Sec3() {
-  const { t } = useLang();
-  const { d, upd } = useData();
-  const rows = calcPL(d);
-
-  const NumInput = ({ k, step }) => (
-    <div>
-      <FieldLabel k={k} tip={k==='wacc'?'waccTip':null} />
-      <input type="number" step={step||1} value={d[k]}
-             onChange={e=>upd(k, parseFloat(e.target.value)||0)} />
-    </div>
-  );
-
-  return (
-    <div className="space-y-6 fade-in">
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-xl">
-        <NumInput k="initInv" /> <NumInput k="loan" /> <NumInput k="loanYrs" />
-        <NumInput k="intRate" step="0.1" /> <NumInput k="irc" /> <NumInput k="wacc" step="0.1" />
-        <NumInput k="opEx" /> <NumInput k="depr" /> <NumInput k="wc" />
-      </div>
-
-      <div>
-        <h3 className="serif font-semibold text-teal-900 text-lg mb-2">{t('plTitle')}</h3>
-        <div className="grid grid-cols-5 gap-2 mb-3">
-          {['r1y','r2y','r3y','r4y','r5y'].map(k=>(
-            <div key={k}>
-              <label className="block text-xs text-gray-500 mb-1">{t(k)}</label>
-              <input type="number" value={d[k]} onChange={e=>upd(k,parseFloat(e.target.value)||0)} />
-            </div>
-          ))}
-        </div>
-        <div className="overflow-x-auto rounded-xl border border-gray-100 shadow-sm">
-          <table>
-            <thead>
-              <tr>{[t('colYr'),t('colRev'),t('colSupp'),t('colPers'),t('colEBITDA'),t('colDepr'),t('colEBIT'),t('colNI')].map(h=><th key={h}>{h}</th>)}</tr>
-            </thead>
-            <tbody>
-              {rows.map(r=>(
-                <tr key={r.yr}>
-                  <td>Yr {r.yr}</td>
-                  <td>{fmt(r.rev)}</td>
-                  <td className="num-neg">{fmt(r.sup)}</td>
-                  <td className="num-neg">{fmt(r.pers)}</td>
-                  <td className={r.ebitda>=0?'num-pos':'num-neg'}>{fmt(r.ebitda)}</td>
-                  <td className="num-neg">{fmt(r.depr)}</td>
-                  <td className={r.ebit>=0?'num-pos':'num-neg'}>{fmt(r.ebit)}</td>
-                  <td className={r.ni>=0?'num-pos':'num-neg'}><strong>{fmt(r.ni)}</strong></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  );
+  const { t } = useLang(); const { d, upd } = useData(); const rows = calcPL(d);
+  const NumInput = ({ k, step }) => (<div><FieldLabel k={k} tip={k==='wacc'?'waccTip':null} /><input type="number" step={step||1} value={d[k]} onChange={e=>upd(k, parseFloat(e.target.value)||0)} /></div>);
+  return (<div className="space-y-6 fade-in"><div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-xl"><NumInput k="initInv" /><NumInput k="loan" /><NumInput k="loanYrs" /><NumInput k="intRate" step="0.1" /><NumInput k="irc" /><NumInput k="wacc" step="0.1" /><NumInput k="opEx" /><NumInput k="depr" /><NumInput k="wc" /></div><div><h3 className="font-semibold text-indigo-900 text-lg mb-2">{t('plTitle')}</h3><div className="grid grid-cols-5 gap-2 mb-3">{['r1y','r2y','r3y','r4y','r5y'].map(k=>(<div key={k}><label className="block text-xs text-gray-500 mb-1">{t(k)}</label><input type="number" value={d[k]} onChange={e=>upd(k,parseFloat(e.target.value)||0)} /></div>))}</div><div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm"><table><thead><tr>{[t('colYr'),t('colRev'),t('colSupp'),t('colPers'),t('colEBITDA'),t('colDepr'),t('colEBIT'),t('colNI')].map(h=><th key={h}>{h}</th>)}</tr></thead><tbody>{rows.map(r=>(<tr key={r.yr}><td>Yr {r.yr}</td><td>{fmt(r.rev)}</td><td className="num-neg">{fmt(r.sup)}</td><td className="num-neg">{fmt(r.pers)}</td><td className={r.ebitda>=0?'num-pos':'num-neg'}>{fmt(r.ebitda)}</td><td className="num-neg">{fmt(r.depr)}</td><td className={r.ebit>=0?'num-pos':'num-neg'}>{fmt(r.ebit)}</td><td className={r.ni>=0?'num-pos':'num-neg'}><strong>{fmt(r.ni)}</strong></td></tr>))}</tbody></table></div></div></div>);
 }
-
-// ─── SECTION 4 ────────────────────────────────────────────────────────────────
 function Sec4() {
-  const { t } = useLang();
-  const { d, upd } = useData();
-  const persp = [
-    { k:'bscFin',  icon:'💰', color:'#eef7f7', border:'#0e3c3e' },
-    { k:'bscCust', icon:'🤝', color:'#fefce8', border:'#b8902e' },
-    { k:'bscProc', icon:'⚙️', color:'#f0fdf4', border:'#166534' },
-    { k:'bscLearn',icon:'📚', color:'#faf5ff', border:'#7e22ce' },
-  ];
-  return (
-    <div className="space-y-4 fade-in">
-      <p className="text-sm text-gray-500">{t('bscSub')}</p>
-      {persp.map(p=>(
-        <div key={p.k} className="rounded-xl p-4" style={{background:p.color, borderLeft:`4px solid ${p.border}`}}>
-          <label className="block text-sm font-semibold text-gray-700 mb-1.5">{p.icon} {t(p.k)}</label>
-          <textarea rows={2} value={d[p.k]} onChange={e=>upd(p.k,e.target.value)}
-                    style={{background:'rgba(255,255,255,0.7)'}} />
-        </div>
-      ))}
-    </div>
-  );
+  const { t } = useLang(); const { d, upd } = useData();
+  const persp = [{ k:'bscFin', icon:'💰'},{ k:'bscCust', icon:'🤝'},{ k:'bscProc', icon:'⚙️'},{ k:'bscLearn',icon:'📚'}];
+  return (<div className="space-y-4 fade-in"><p className="text-sm text-gray-500">{t('bscSub')}</p>{persp.map(p=>(<div key={p.k} className="rounded-xl p-4 bg-white border border-gray-100 shadow-sm"><label className="block text-sm font-semibold text-gray-700 mb-1.5">{p.icon} {t(p.k)}</label><textarea rows={2} value={d[p.k]} onChange={e=>upd(p.k,e.target.value)} className="bg-gray-50" /></div>))}</div>);
 }
-
-// ─── SECTION 5 ────────────────────────────────────────────────────────────────
 function Sec5() {
-  const { t } = useLang();
-  const { d, upd } = useData();
-  return (
-    <div className="space-y-6 fade-in">
-      <div>
-        <FieldLabel k="riskQ" />
-        <div className="space-y-2 mt-1">
-          {['ro1','ro2','ro3'].map(o=>(
-            <label key={o} className={cls('radio-card', d.riskMain===o&&'selected')}>
-              <input type="radio" name="risk" checked={d.riskMain===o} onChange={()=>upd('riskMain',o)} className="sr-only" />
-              {t(o)}
-            </label>
-          ))}
-        </div>
-      </div>
-      <div>
-        <FieldLabel k="action" />
-        <textarea rows={4} value={d.action} onChange={e=>upd('action',e.target.value)} />
-      </div>
-    </div>
-  );
+  const { t } = useLang(); const { d, upd } = useData();
+  return (<div className="space-y-6 fade-in"><div><FieldLabel k="riskQ" /><div className="space-y-2 mt-1">{['ro1','ro2','ro3'].map(o=>(<label key={o} className={cls('radio-card', d.riskMain===o&&'selected')}><input type="radio" name="risk" checked={d.riskMain===o} onChange={()=>upd('riskMain',o)} className="sr-only" />{t(o)}</label>))}</div></div><div><FieldLabel k="action" /><textarea rows={4} value={d.action} onChange={e=>upd('action',e.target.value)} /></div></div>);
 }
 
-// ─── PDF GENERATOR ────────────────────────────────────────────────────────────
+// ─── PDF GENERATOR (with custom font registration) ────────────────────────────
 function generatePDF(d, t) {
   try {
+    // Register custom font to avoid missing font warning
+    pdfMake.fonts = {
+      Roboto: {
+        normal: 'Roboto-Regular.ttf',
+        bold: 'Roboto-Medium.ttf',
+        italics: 'Roboto-Italic.ttf',
+        bolditalics: 'Roboto-MediumItalic.ttf'
+      }
+    };
     const rows = calcPL(d);
     const tableBody = [
-      [{text:t('colYr'),bold:true},{text:t('colRev'),bold:true},{text:t('colSupp'),bold:true},
-       {text:t('colPers'),bold:true},{text:t('colEBITDA'),bold:true},{text:t('colDepr'),bold:true},
-       {text:t('colEBIT'),bold:true},{text:t('colNI'),bold:true}],
-      ...rows.map(r=>[
-        `Year ${r.yr}`, fmt(r.rev), fmt(r.sup), fmt(r.pers),
-        fmt(r.ebitda), fmt(r.depr), fmt(r.ebit), fmt(r.ni)
-      ])
+      [{text:t('colYr'),bold:true},{text:t('colRev'),bold:true},{text:t('colSupp'),bold:true},{text:t('colPers'),bold:true},{text:t('colEBITDA'),bold:true},{text:t('colDepr'),bold:true},{text:t('colEBIT'),bold:true},{text:t('colNI'),bold:true}],
+      ...rows.map(r=>[`Year ${r.yr}`, fmt(r.rev), fmt(r.sup), fmt(r.pers), fmt(r.ebitda), fmt(r.depr), fmt(r.ebit), fmt(r.ni)])
     ];
-
     const doc = {
       pageMargins:[40,60,40,60],
       content:[
-        {text:'BUSINESS PLAN REPORT', style:'h1', alignment:'center'},
-        {text:`Prepared for banking review  •  ${new Date().toLocaleDateString('en-GB')}`, alignment:'center', fontSize:10, color:'#6b7280', margin:[0,4,0,0]},
-        {text:d.bName, alignment:'center', fontSize:14, bold:true, color:'#0e3c3e', margin:[0,6,0,20]},
-        {canvas:[{type:'line',x1:0,y1:0,x2:515,y2:0,lineWidth:1,lineColor:'#b8902e'}]},
-        {text:'1. Foundational Elements', style:'h2'},
-        {text:`Legal structure: ${t(d.legalStr)}`, margin:[0,0,0,4]},
-        {text:`Mission: ${d.mission}`, margin:[0,0,0,4]},
-        {text:`Vision: ${d.vision}`, margin:[0,0,0,4]},
-        {text:`Core Values: ${(d.values||[]).map(v=>t(v)).join(', ')}`, margin:[0,0,0,4]},
-        {text:`Executive Summary type: ${t(d.exec)}`, margin:[0,0,0,12]},
-        {canvas:[{type:'line',x1:0,y1:0,x2:515,y2:0,lineWidth:0.5,lineColor:'#e5e7eb'}]},
-        {text:'2. Market Analysis', style:'h2'},
-        {text:`Key PESTEL factor: ${t(d.pestel)}`, margin:[0,0,0,4]},
-        {text:`Porter's intensity: ${t(d.porter)}`, margin:[0,0,0,4]},
-        {text:`Value proposition: ${d.bmcVal}`, margin:[0,0,0,4]},
-        {text:`Main channel: ${d.bmcCh}`, margin:[0,0,0,4]},
-        {text:`Marketing mix focus: ${d.mktMix}`, margin:[0,0,0,12]},
-        {canvas:[{type:'line',x1:0,y1:0,x2:515,y2:0,lineWidth:0.5,lineColor:'#e5e7eb'}]},
-        {text:'3. Financial Projections', style:'h2'},
-        {columns:[
-          {text:`Initial investment: ${fmt(d.initInv)}`, fontSize:10},
-          {text:`Loan: ${fmt(d.loan)} over ${d.loanYrs} yrs @ ${d.intRate}%`, fontSize:10},
-          {text:`WACC: ${d.wacc}% | IRC: ${d.irc}%`, fontSize:10},
-        ], margin:[0,0,0,8]},
-        {table:{headerRows:1, widths:['auto','*','*','*','*','auto','*','*'], body:tableBody},
-         layout:{fillColor:(ri)=>ri===0?'#f0f4f4':null}, margin:[0,0,0,12]},
-        {canvas:[{type:'line',x1:0,y1:0,x2:515,y2:0,lineWidth:0.5,lineColor:'#e5e7eb'}]},
-        {text:'4. Balanced Scorecard', style:'h2'},
-        {text:`💰 Financial: ${d.bscFin}`, margin:[0,0,0,4]},
-        {text:`🤝 Customer: ${d.bscCust}`, margin:[0,0,0,4]},
-        {text:`⚙️  Processes: ${d.bscProc}`, margin:[0,0,0,4]},
-        {text:`📚 Learning: ${d.bscLearn}`, margin:[0,0,0,12]},
-        {canvas:[{type:'line',x1:0,y1:0,x2:515,y2:0,lineWidth:0.5,lineColor:'#e5e7eb'}]},
-        {text:'5. Risk & Mitigation', style:'h2'},
-        {text:`Primary risk: ${t(d.riskMain)}`, margin:[0,0,0,4]},
-        {text:`90-day action plan: ${d.action}`, margin:[0,0,0,20]},
-        {text:'Prepared in accordance with IAPMEI & ANIET guidelines for SME financing.',
-         fontSize:8, color:'#9ca3af', alignment:'center'},
-        {text:'Designed by Aditya Neil Banerjee · Technology demonstrator',
-         fontSize:8, color:'#d1d5db', alignment:'center', margin:[0,4,0,0]},
+        {text:'AIRO BUSINESS PLAN REPORT', style:'h1', alignment:'center'},
+        {text:`Prepared for grant readiness • ${new Date().toLocaleDateString('en-GB')}`, alignment:'center', fontSize:10, color:'#6b7280', margin:[0,4,0,0]},
+        {text:d.bName, alignment:'center', fontSize:14, bold:true, color:'#4F46E5', margin:[0,6,0,20]},
+        {canvas:[{type:'line',x1:0,y1:0,x2:515,y2:0,lineWidth:1,lineColor:'#4F46E5'}]},
+        {text:'1. Foundational Elements', style:'h2'},{text:`Legal structure: ${t(d.legalStr)}`, margin:[0,0,0,4]},{text:`Mission: ${d.mission}`, margin:[0,0,0,4]},{text:`Vision: ${d.vision}`, margin:[0,0,0,4]},{text:`Core Values: ${(d.values||[]).map(v=>t(v)).join(', ')}`, margin:[0,0,0,4]},{text:`Executive Summary type: ${t(d.exec)}`, margin:[0,0,0,12]},
+        {canvas:[{type:'line',x1:0,y1:0,x2:515,y2:0,lineWidth:0.5,lineColor:'#e5e7eb'}]},{text:'2. Market Analysis', style:'h2'},{text:`Key PESTEL factor: ${t(d.pestel)}`, margin:[0,0,0,4]},{text:`Porter's intensity: ${t(d.porter)}`, margin:[0,0,0,4]},{text:`Value proposition: ${d.bmcVal}`, margin:[0,0,0,4]},{text:`Main channel: ${d.bmcCh}`, margin:[0,0,0,4]},{text:`Marketing mix focus: ${d.mktMix}`, margin:[0,0,0,12]},
+        {canvas:[{type:'line',x1:0,y1:0,x2:515,y2:0,lineWidth:0.5,lineColor:'#e5e7eb'}]},{text:'3. Financial Projections', style:'h2'},{columns:[{text:`Initial investment: ${fmt(d.initInv)}`, fontSize:10},{text:`Loan: ${fmt(d.loan)} over ${d.loanYrs} yrs @ ${d.intRate}%`, fontSize:10},{text:`WACC: ${d.wacc}% | IRC: ${d.irc}%`, fontSize:10}], margin:[0,0,0,8]},{table:{headerRows:1, widths:['auto','*','*','*','*','auto','*','*'], body:tableBody}, layout:{fillColor:(ri)=>ri===0?'#f0f4f4':null}, margin:[0,0,0,12]},
+        {canvas:[{type:'line',x1:0,y1:0,x2:515,y2:0,lineWidth:0.5,lineColor:'#e5e7eb'}]},{text:'4. Balanced Scorecard', style:'h2'},{text:`💰 Financial: ${d.bscFin}`, margin:[0,0,0,4]},{text:`🤝 Customer: ${d.bscCust}`, margin:[0,0,0,4]},{text:`⚙️ Processes: ${d.bscProc}`, margin:[0,0,0,4]},{text:`📚 Learning: ${d.bscLearn}`, margin:[0,0,0,12]},
+        {canvas:[{type:'line',x1:0,y1:0,x2:515,y2:0,lineWidth:0.5,lineColor:'#e5e7eb'}]},{text:'5. Risk & Mitigation', style:'h2'},{text:`Primary risk: ${t(d.riskMain)}`, margin:[0,0,0,4]},{text:`90-day action plan: ${d.action}`, margin:[0,0,0,20]},
+        {text:'Prepared with AIRO • Grant application support', fontSize:8, color:'#9ca3af', alignment:'center'},{text:'More resources: https://drive.google.com/drive/folders/1k0ozTSS4cL9zHQIOaLmywet0e9Z_gLyV', fontSize:7, color:'#d1d5db', alignment:'center', margin:[0,4,0,0]}
       ],
-      styles:{
-        h1:{fontSize:20, bold:true, color:'#0e3c3e', margin:[0,0,0,4]},
-        h2:{fontSize:13, bold:true, color:'#0e3c3e', margin:[0,14,0,6]},
-      },
+      styles:{h1:{fontSize:20, bold:true, color:'#4F46E5', margin:[0,0,0,4]},h2:{fontSize:13, bold:true, color:'#1F2937', margin:[0,14,0,6]}},
       defaultStyle:{font:'Roboto', fontSize:10, color:'#374151', lineHeight:1.4}
     };
-    pdfMake.createPdf(doc).download(`BusinessPlan_${d.bName.replace(/\s/g,'_')}.pdf`);
-  } catch(e) {
-    alert('PDF error: ' + e.message);
-  }
+    pdfMake.createPdf(doc).download(`AIRO_BusinessPlan_${d.bName.replace(/\s/g,'_')}.pdf`);
+  } catch(e) { alert('PDF error: ' + e.message); }
 }
 
 // ─── RANDOM FACTS ─────────────────────────────────────────────────────────────
 function FactBanner() {
   const { t } = useLang();
   const keys = ['fact1','fact2','fact3','fact4','fact5','fact6'];
-  const [idx, setIdx] = useState(0);
-  const [vis, setVis] = useState(true);
-  useEffect(()=>{
-    const iv = setInterval(()=>{
-      setVis(false);
-      setTimeout(()=>{ setIdx(i=>(i+1)%keys.length); setVis(true); },300);
-    },7000);
-    return ()=>clearInterval(iv);
-  },[]);
-  return (
-    <div className={`fact-bar px-4 py-2.5 mb-5 rounded-r-xl text-sm text-amber-900 font-medium transition-opacity duration-300 ${vis?'opacity-100':'opacity-0'}`}>
-      {t(keys[idx])}
-    </div>
-  );
+  const [idx, setIdx] = useState(0); const [vis, setVis] = useState(true);
+  useEffect(()=>{ const iv = setInterval(()=>{ setVis(false); setTimeout(()=>{ setIdx(i=>(i+1)%keys.length); setVis(true); },300); },7000); return ()=>clearInterval(iv); },[]);
+  return (<div className={`fact-bar px-4 py-2.5 mb-5 rounded-r-xl text-sm text-amber-800 font-medium transition-opacity duration-300 ${vis?'opacity-100':'opacity-0'}`}>{t(keys[idx])}</div>);
 }
 
-// ─── MAIN APP (fixed: removed 'export default') ────────────────────────────────────────────────
+// ─── MAIN APP ─────────────────────────────────────────────────────────────────
 const SECTIONS = ['s1','s2','s3','s4','s5'];
 const SECTION_TITLES = { s1:'Sec1', s2:'Sec2', s3:'Sec3', s4:'Sec4', s5:'Sec5' };
 
 function App() {
-  const [lang, setLang] = useState(()=>{
-    const browser = (navigator.language||'en').slice(0,2);
-    return TRANS[browser] ? browser : 'en';
-  });
+  const [lang, setLang] = useState(()=>{ const browser = (navigator.language||'en').slice(0,2); return TRANS[browser] ? browser : 'en'; });
   const [d, setD] = useState(loadData);
   const [sec, setSec] = useState(0);
-  const [gdpr, setGdpr] = useState(()=>localStorage.getItem('bpb_gdpr')==='1');
-
-  useEffect(()=>{ localStorage.setItem('bpb_v2', JSON.stringify(d)); },[d]);
+  const [gdpr, setGdpr] = useState(()=>localStorage.getItem('airo_gdpr')==='1');
+  useEffect(()=>{ localStorage.setItem('airo_bpb_v2', JSON.stringify(d)); },[d]);
   const upd = useCallback((k,v)=>setD(prev=>({...prev,[k]:v})),[]);
   const t = useCallback((k)=>(TRANS[lang]||TRANS.en)[k]||k,[lang]);
-
-  const acceptGdpr = ()=>{ setGdpr(true); localStorage.setItem('bpb_gdpr','1'); };
-
+  const acceptGdpr = ()=>{ setGdpr(true); localStorage.setItem('airo_gdpr','1'); };
   const SectionComp = { Sec1, Sec2, Sec3, Sec4, Sec5 };
   const CurrentSection = SectionComp[SECTION_TITLES[SECTIONS[sec]]];
 
   return (
     <LangCtx.Provider value={{lang,setLang,t}}>
       <DataCtx.Provider value={{d,upd}}>
-        <div className="min-h-screen">
-
-          {/* GDPR */}
-          {!gdpr && (
-            <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 flex items-center justify-between gap-4 text-sm text-amber-800">
-              <span>{t('gdpr')}</span>
-              <button onClick={acceptGdpr}
-                      className="shrink-0 bg-teal-700 text-white text-xs px-3 py-1 rounded-full hover:bg-teal-800 transition">
-                {t('gotIt')}
-              </button>
-            </div>
-          )}
-
-          {/* HEADER */}
-          <header className="bg-white border-b border-gray-100 shadow-sm sticky top-0 z-20">
-            <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-              <div>
-                <h1 className="serif text-xl font-bold text-teal-900 leading-none">{t('appTitle')}</h1>
-                <p className="text-xs text-amber-700 mt-0.5">{t('tagline')}</p>
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+          {!gdpr && (<div className="bg-indigo-50 border-b border-indigo-200 px-4 py-2 flex items-center justify-between gap-4 text-sm text-indigo-800"><span>{t('gdpr')}</span><button onClick={acceptGdpr} className="shrink-0 bg-indigo-600 text-white text-xs px-3 py-1 rounded-full hover:bg-indigo-700 transition">{t('gotIt')}</button></div>)}
+          <header className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-20">
+            <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <img src="https://www.airo.pt/images/airo_Branco.png" alt="AIRO" className="h-10 w-auto bg-indigo-700 rounded-lg p-1.5" style={{background: 'linear-gradient(135deg, #4F46E5, #7C3AED)'}} />
+                <div><h1 className="text-xl font-bold text-indigo-900 leading-none">{t('appTitle')}</h1><p className="text-xs text-indigo-600 mt-0.5">{t('tagline')}</p></div>
               </div>
-              <select value={lang} onChange={e=>setLang(e.target.value)}
-                      className="text-sm border border-gray-200 rounded-lg px-2 py-1.5 bg-white w-auto">
-                <option value="en">🇬🇧 English</option>
-                <option value="pt">🇵🇹 Português</option>
-              </select>
+              <div className="flex items-center gap-3">
+                <a href="https://drive.google.com/drive/folders/1k0ozTSS4cL9zHQIOaLmywet0e9Z_gLyV" target="_blank" rel="noopener noreferrer" className="text-xs bg-gray-100 hover:bg-gray-200 rounded-full px-3 py-1.5 text-gray-700 transition flex items-center gap-1">{t('resources')}</a>
+                <select value={lang} onChange={e=>setLang(e.target.value)} className="text-sm border border-gray-200 rounded-lg px-2 py-1.5 bg-white"><option value="en">🇬🇧 EN</option><option value="pt">🇵🇹 PT</option></select>
+              </div>
             </div>
           </header>
-
-          <main className="max-w-4xl mx-auto px-4 py-6">
-
-            {/* PROGRESS */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-5">
-              <div className="flex justify-between text-xs text-gray-500 mb-1.5">
-                <span className="font-medium">{t('progress')}</span>
-                <span>{Math.round(((sec+1)/SECTIONS.length)*100)}%</span>
-              </div>
-              <div className="w-full bg-gray-100 rounded-full h-2 mb-3">
-                <div className="bg-gradient-to-r from-teal-700 to-teal-500 h-2 rounded-full transition-all duration-500"
-                     style={{width:`${((sec+1)/SECTIONS.length)*100}%`}} />
-              </div>
-              <div className="flex gap-2 flex-wrap">
-                {SECTIONS.map((s,i)=>(
-                  <button key={s} onClick={()=>setSec(i)}
-                          className={cls('step-pill',
-                            i===sec?'active': i<sec?'done':'inactive')}>
-                    {i<sec?'✓ ':''}{t(s)}
-                  </button>
-                ))}
-              </div>
+          <main className="max-w-5xl mx-auto px-4 py-8">
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-5 mb-6 card-hover">
+              <div className="flex justify-between text-xs text-gray-500 mb-1.5"><span className="font-medium">{t('progress')}</span><span>{Math.round(((sec+1)/SECTIONS.length)*100)}%</span></div>
+              <div className="w-full bg-gray-100 rounded-full h-2 mb-4"><div className="bg-gradient-to-r from-indigo-600 to-indigo-400 h-2 rounded-full transition-all duration-500" style={{width:`${((sec+1)/SECTIONS.length)*100}%`}} /></div>
+              <div className="flex gap-2 flex-wrap">{SECTIONS.map((s,i)=>(<button key={s} onClick={()=>setSec(i)} className={cls('step-pill', i===sec?'active': i<sec?'done':'inactive')}>{i<sec?'✓ ':''}{t(s)}</button>))}</div>
             </div>
-
             <FactBanner />
-
-            {/* SECTION CARD */}
-            <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 md:p-8">
-              <h2 className="serif text-2xl font-bold text-teal-900 mb-6">{t(SECTIONS[sec])}</h2>
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 md:p-8 transition-all">
+              <h2 className="text-2xl font-bold text-indigo-900 mb-6">{t(SECTIONS[sec])}</h2>
               <CurrentSection />
-
-              {/* NAV BUTTONS */}
               <div className="flex justify-between items-center mt-10 pt-6 border-t border-gray-100">
-                <button
-                  onClick={()=>sec>0&&setSec(s=>s-1)}
-                  disabled={sec===0}
-                  className={cls('px-5 py-2 rounded-xl text-sm font-medium transition',
-                    sec===0?'text-gray-300 cursor-not-allowed':'bg-gray-100 hover:bg-gray-200 text-gray-700')}>
-                  {t('prev')}
-                </button>
-                {sec===SECTIONS.length-1
-                  ? <button onClick={()=>generatePDF(d,t)}
-                            className="px-6 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-sm font-semibold shadow-md transition">
-                      {t('genPDF')}
-                    </button>
-                  : <button onClick={()=>setSec(s=>s+1)}
-                            className="px-6 py-2.5 bg-teal-700 hover:bg-teal-800 text-white rounded-xl text-sm font-semibold shadow-md transition">
-                      {t('next')}
-                    </button>
-                }
+                <button onClick={()=>sec>0&&setSec(s=>s-1)} disabled={sec===0} className={cls('px-5 py-2.5 rounded-xl text-sm font-medium transition', sec===0?'text-gray-300 cursor-not-allowed bg-gray-100':'bg-white border border-gray-200 hover:border-indigo-300 text-gray-700')}>{t('prev')}</button>
+                {sec===SECTIONS.length-1 ? <button onClick={()=>generatePDF(d,t)} className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold shadow-md transition transform hover:-translate-y-0.5">{t('genPDF')}</button> : <button onClick={()=>setSec(s=>s+1)} className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold shadow-md transition">{t('next')}</button>}
               </div>
             </div>
           </main>
-
-          <footer className="text-center py-6 text-xs text-gray-300 border-t mt-8">
-            Designed in Portugal by Aditya Neil Banerjee &nbsp;·&nbsp; Technology demonstrator · Awaiting Go-live authorisation
+          <footer className="text-center py-8 text-xs text-gray-400 border-t mt-12 bg-white">
+            <div className="max-w-5xl mx-auto px-4 flex flex-col gap-2">
+              <p>© AIRO — Intelligent Grant Applications • <a href="https://www.airo.pt" target="_blank" className="text-indigo-500 hover:underline">airo.pt</a></p>
+              <p>Support materials & templates: <a href="https://drive.google.com/drive/folders/1k0ozTSS4cL9zHQIOaLmywet0e9Z_gLyV" target="_blank" rel="noopener noreferrer" className="text-indigo-500 hover:underline">Grant Resources Folder</a></p>
+              <p className="text-gray-300">Technology demonstrator • Pre‑compile JSX for production deployment</p>
+            </div>
           </footer>
         </div>
       </DataCtx.Provider>
@@ -647,10 +558,8 @@ function App() {
   );
 }
 
-// ─── MOUNT ────────────────────────────────────────────────────────────────────
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(<App />);
 </script>
 </body>
 </html>
-```
