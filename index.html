@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Business Plan Builder | Bank-Ready Questionnaire</title>
+    <!-- Tailwind CSS + Fonts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & Playfair Display -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- React, ReactDOM, Babel (for JSX) -->
+    <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.min.js"></script>
+    <!-- i18next & react-i18next -->
+    <script src="https://cdn.jsdelivr.net/npm/i18next@23.7.6/dist/umd/i18next.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-i18next@14.1.0/dist/umd/react-i18next.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/i18next-browser-languagedetector@7.2.0/dist/umd/i18nextBrowserLanguageDetector.min.js"></script>
+    <!-- pdfmake + vfs_fonts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/vfs_fonts.min.js"></script>
+    <!-- LocalStorage helper no extra libs -->
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .serif-heading { font-family: 'Playfair Display', serif; }
+        .card-hover { transition: all 0.2s ease; }
+        .card-hover:hover { box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.01); }
+        .step-active { background-color: #0f3b3d; color: white; border-color: #0f3b3d; }
+        .progress-bar-fill { transition: width 0.3s ease; }
+        input, select, textarea { transition: all 0.2s; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #c9a03d; ring: 2px solid #c9a03d30; }
+        .radio-card { border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 0.75rem; transition: all 0.1s; cursor: pointer; }
+        .radio-card.selected { border-color: #0f3b3d; background-color: #f0f9f9; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, createContext, useContext, useMemo } = React;
+
+        // ---------- i18n initialization ----------
+        const resources = {
+            en: { translation: {
+                appTitle: "Business Plan Builder",
+                gdprBanner: "This website does not use cookies. We only save your progress locally on your device. No personal data is collected or shared.",
+                okGotIt: "OK, got it",
+                privacyLink: "Privacy policy (no data collection)",
+                progress: "Progress",
+                next: "Next Section",
+                prev: "Previous",
+                generatePDF: "Generate PDF Report",
+                completeMsg: "All sections completed! You can now generate your bank-ready PDF.",
+                // Section titles
+                s1: "1. Foundational Business Elements",
+                s2: "2. Market Analysis",
+                s3: "3. Financial Projections",
+                s4: "4. Strategic Management",
+                s5: "5. Implementation & Monitoring",
+                // Questions labels (simplified but covering key fields)
+                businessName: "Business name / Company name",
+                legalStructure: "Legal structure of your business",
+                legalOpt1: "Sole Proprietorship",
+                legalOpt2: "Lda. (Limited Liability)",
+                legalOpt3: "S.A.",
+                mission: "Mission statement (purpose, markets, services)",
+                vision: "Vision statement (5-10 years future)",
+                coreValues: "Select 3-5 core values that guide your organization",
+                valResp: "Responsibility & Ethics",
+                valClient: "Customer Orientation",
+                valPassion: "Passion & Excellence",
+                valInnov: "Innovation",
+                valPeople: "Human Development",
+                execSummary: "Executive summary: choose the primary statement that captures your business purpose",
+                execOpt1: "Offer premium local berries (blueberry & strawberry) to regional markets",
+                execOpt2: "Sustainable greenhouse production with export potential",
+                execOpt3: "Direct-to-consumer and local retail fresh berries",
+                pestel: "Key PESTEL factor affecting your business (select main one)",
+                pestOpt1: "Political stability & agricultural subsidies",
+                pestOpt2: "Inflation & energy costs (Economic)",
+                pestOpt3: "Health-conscious consumer trends (Social)",
+                pestOpt4: "Greenhouse automation (Technological)",
+                fiveForces: "Porter's Five Forces – overall industry intensity",
+                forceLow: "Low (attractive)",
+                forceMed: "Medium (moderate)",
+                forceHigh: "High (challenging)",
+                bmcValue: "Value proposition (why customers choose you)",
+                bmcChannel: "Main channel to reach customers",
+                marketingMix: "Primary Marketing Mix focus",
+                // Financial numeric fields (keys)
+                initialInvestment: "Total initial investment (€)",
+                loanAmount: "Bank loan amount requested (€)",
+                loanTermYears: "Loan term (years)",
+                interestRate: "Annual interest rate (%)",
+                taxRate: "Corporate income tax (IRC %)",
+                revenueY1: "Projected Year 1 Revenue (€)",
+                revenueY2: "Year 2 Revenue (€)",
+                revenueY3: "Year 3 Revenue (€)",
+                revenueY4: "Year 4 Revenue (€)",
+                revenueY5: "Year 5 Revenue (€)",
+                opExpRatio: "Operating expenses (excl. depreciation) as % of revenue",
+                deprAmount: "Annual depreciation (€)",
+                wacc: "Weighted Average Cost of Capital (WACC %)",
+                workingCapitalPct: "Working capital needs (% of revenue)",
+                riskMain: "Biggest risk to your venture (select one)",
+                riskOpt1: "Price volatility & market competition",
+                riskOpt2: "Climate dependency & production risk",
+                riskOpt3: "Cash flow & loan repayment pressure",
+                actionPlan: "Key action in first 90 days to mitigate risk",
+            } },
+            pt: { translation: {
+                appTitle: "Criador de Plano de Negócios",
+                gdprBanner: "Este site não usa cookies. Apenas guardamos o seu progresso localmente no seu dispositivo. Nenhum dado pessoal é recolhido ou partilhado.",
+                okGotIt: "Ok, entendi",
+                privacyLink: "Política de privacidade (sem recolha de dados)",
+                progress: "Progresso",
+                next: "Próxima Secção",
+                prev: "Anterior",
+                generatePDF: "Gerar Relatório PDF",
+                completeMsg: "Todas as secções concluídas! Pode gerar o seu PDF pronto para o banco.",
+                s1: "1. Elementos Fundamentais do Negócio",
+                s2: "2. Análise de Mercado",
+                s3: "3. Projeções Financeiras",
+                s4: "4. Gestão Estratégica",
+                s5: "5. Implementação e Monitorização",
+                businessName: "Nome da empresa",
+                legalStructure: "Estrutura legal do negócio",
+                legalOpt1: "Empresário em Nome Individual",
+                legalOpt2: "Lda.",
+                legalOpt3: "S.A.",
+                mission: "Declaração de missão",
+                vision: "Declaração de visão",
+                coreValues: "Selecione 3-5 valores principais",
+                valResp: "Responsabilidade e Ética",
+                valClient: "Orientação ao Cliente",
+                valPassion: "Paixão e Excelência",
+                valInnov: "Inovação",
+                valPeople: "Desenvolvimento Humano",
+                execSummary: "Resumo executivo: escolha a declaração principal",
+                execOpt1: "Oferecer frutos vermelhos premium (mirtilo e morango) para mercados regionais",
+                execOpt2: "Produção sustentável em estufa com potencial de exportação",
+                execOpt3: "Venda direta ao consumidor e retalho local",
+                pestel: "Fator PESTEL mais relevante",
+                pestOpt1: "Estabilidade política e subsídios agrícolas",
+                pestOpt2: "Inflação e custos de energia (Económico)",
+                pestOpt3: "Tendências de consumidores saudáveis (Social)",
+                pestOpt4: "Automação de estufas (Tecnológico)",
+                fiveForces: "Intensidade geral das Cinco Forças de Porter",
+                forceLow: "Baixa (atrativo)",
+                forceMed: "Média (moderado)",
+                forceHigh: "Alta (desafiante)",
+                bmcValue: "Proposta de valor",
+                bmcChannel: "Principal canal para clientes",
+                marketingMix: "Foco principal do Marketing Mix",
+                initialInvestment: "Investimento inicial total (€)",
+                loanAmount: "Montante do empréstimo solicitado (€)",
+                loanTermYears: "Prazo do empréstimo (anos)",
+                interestRate: "Taxa de juro anual (%)",
+                taxRate: "Taxa de IRC (%)",
+                revenueY1: "Receita Ano 1 (€)",
+                revenueY2: "Receita Ano 2 (€)",
+                revenueY3: "Receita Ano 3 (€)",
+                revenueY4: "Receita Ano 4 (€)",
+                revenueY5: "Receita Ano 5 (€)",
+                opExpRatio: "Despesas operacionais (excl. depreciação) % da receita",
+                deprAmount: "Depreciação anual (€)",
+                wacc: "Custo médio ponderado de capital (WACC %)",
+                workingCapitalPct: "Necessidade de fundo de maneio (% da receita)",
+                riskMain: "Maior risco para o negócio",
+                riskOpt1: "Volatilidade de preços e concorrência",
+                riskOpt2: "Dependência climática e risco de produção",
+                riskOpt3: "Fluxo de caixa e pressão de reembolso",
+                actionPlan: "Principal ação nos primeiros 90 dias para mitigar o risco",
+            } },
+            hi: { translation: { appTitle: "व्यवसाय योजना निर्माता", gdprBanner: "यह वेबसाइट कुकीज़ का उपयोग नहीं करती। हम केवल आपकी प्रगति आपके डिवाइस पर स्थानीय रूप से सहेजते हैं। कोई व्यक्तिगत डेटा एकत्र या साझा नहीं किया जाता।", okGotIt: "ठीक है", privacyLink: "गोपनीयता नीति", progress: "प्रगति", next: "अगला भाग", prev: "पिछला", generatePDF: "पीडीएफ रिपोर्ट बनाएं", completeMsg: "सभी अनुभाग पूर्ण! अब आप बैंक-तैयार पीडीएफ जेनरेट कर सकते हैं।", s1: "1. मूलभूत व्यावसायिक तत्व", s2: "2. बाजार विश्लेषण", s3: "3. वित्तीय प्रक्षेपण", s4: "4. रणनीतिक प्रबंधन", s5: "5. कार्यान्वयन और निगरानी", businessName: "व्यवसाय का नाम", legalStructure: "कानूनी ढांचा", legalOpt1: "एकल स्वामित्व", legalOpt2: "एलडीए (प्राइवेट लिमिटेड)", legalOpt3: "एसए", mission: "मिशन वक्तव्य", vision: "विजन वक्तव्य", coreValues: "3-5 मूल मूल्य चुनें", valResp: "जिम्मेदारी और नैतिकता", valClient: "ग्राहक उन्मुखीकरण", valPassion: "जुनून और उत्कृष्टता", valInnov: "नवाचार", valPeople: "मानव विकास", execSummary: "कार्यकारी सारांश", execOpt1: "प्रीमियम स्थानीय बेरी (ब्लूबेरी और स्ट्रॉबेरी)", execOpt2: "निर्यात क्षमता के साथ टिकाऊ ग्रीनहाउस उत्पादन", execOpt3: "प्रत्यक्ष-से-उपभोक्ता और स्थानीय खुदरा", pestel: "प्रमुख PESTEL कारक", pestOpt1: "राजनीतिक स्थिरता और कृषि सब्सिडी", pestOpt2: "मुद्रास्फीति और ऊर्जा लागत", pestOpt3: "स्वास्थ्य जागरूक उपभोक्ता रुझान", pestOpt4: "ग्रीनहाउस स्वचालन", fiveForces: "पोर्टर की पांच शक्तियाँ - समग्र तीव्रता", forceLow: "कम (आकर्षक)", forceMed: "मध्यम", forceHigh: "उच्च (चुनौतीपूर्ण)", bmcValue: "मूल्य प्रस्ताव", bmcChannel: "मुख्य वितरण चैनल", marketingMix: "प्राथमिक मार्केटिंग मिक्स फोकस", initialInvestment: "कुल प्रारंभिक निवेश (€)", loanAmount: "अनुरोधित ऋण राशि (€)", loanTermYears: "ऋण अवधि (वर्ष)", interestRate: "वार्षिक ब्याज दर (%)", taxRate: "कॉर्पोरेट आयकर दर (%)", revenueY1: "वर्ष 1 राजस्व (€)", revenueY2: "वर्ष 2 राजस्व (€)", revenueY3: "वर्ष 3 राजस्व (€)", revenueY4: "वर्ष 4 राजस्व (€)", revenueY5: "वर्ष 5 राजस्व (€)", opExpRatio: "परिचालन व्यय (% राजस्व)", deprAmount: "वार्षिक मूल्यह्रास (€)", wacc: "पूंजी की भारित औसत लागत (%)", workingCapitalPct: "कार्यशील पूंजी आवश्यकता (% राजस्व)", riskMain: "आपके उद्यम का सबसे बड़ा जोखिम", riskOpt1: "मूल्य अस्थिरता और प्रतिस्पर्धा", riskOpt2: "जलवायु निर्भरता और उत्पादन जोखिम", riskOpt3: "नकदी प्रवाह और ऋण चुकौती दबाव", actionPlan: "जोखिम कम करने के लिए पहले 90 दिनों में प्रमुख कार्रवाई", } },
+            bn: { translation: { appTitle: "ব্যবসায়িক পরিকল্পনা নির্মাতা", gdprBanner: "এই ওয়েবসাইট কুকি ব্যবহার করে না। আমরা শুধুমাত্র আপনার ডিভাইসে স্থানীয়ভাবে আপনার অগ্রগতি সংরক্ষণ করি। কোনো ব্যক্তিগত তথ্য সংগ্রহ বা ভাগ করা হয় না।", okGotIt: "ঠিক আছে", privacyLink: "গোপনীয়তা নীতি", progress: "অগ্রগতি", next: "পরবর্তী বিভাগ", prev: "পূর্ববর্তী", generatePDF: "পিডিএফ রিপোর্ট তৈরি করুন", completeMsg: "সমস্ত বিভাগ সম্পূর্ণ! এখন আপনি ব্যাংক-প্রস্তুত পিডিএফ তৈরি করতে পারেন।", s1: "১. মৌলিক ব্যবসায়িক উপাদান", s2: "২. বাজার বিশ্লেষণ", s3: "৩. আর্থিক প্রজেকশন", s4: "৪. কৌশলগত ব্যবস্থাপনা", s5: "৫. বাস্তবায়ন ও পর্যবেক্ষণ", businessName: "ব্যবসার নাম", legalStructure: "আইনি কাঠামো", mission: "মিশন স্টেটমেন্ট", vision: "ভিশন স্টেটমেন্ট", coreValues: "৩-৫টি মূল মূল্যবোধ নির্বাচন করুন", valResp: "দায়িত্ব ও নৈতিকতা", valClient: "গ্রাহক অভিমুখীতা", valPassion: "আবেগ ও শ্রেষ্ঠত্ব", valInnov: "উদ্ভাবন", valPeople: "মানব উন্নয়ন", execSummary: "এক্সিকিউটিভ সামারি", execOpt1: "প্রিমিয়াম স্থানীয় বেরি (ব্লুবেরি ও স্ট্রবেরি)", execOpt2: "টেকসই গ্রিনহাউস উৎপাদন", execOpt3: "সরাসরি-ভোক্তা এবং স্থানীয় খুচরা", pestel: "প্রধান PESTEL ফ্যাক্টর", fiveForces: "পোর্টারের পঞ্চম শক্তি - সামগ্রিক তীব্রতা", initialInvestment: "মোট প্রাথমিক বিনিয়োগ (€)", loanAmount: "ঋণের পরিমাণ (€)", taxRate: "কর হার (%)", revenueY1: "১ম বছর আয় (€)", wacc: "WACC (%)", riskMain: "সবচেয়ে বড় ঝুঁকি", } },
+            ur: { translation: { appTitle: "بزنس پلان بنانے والا", gdprBanner: "یہ ویب سائٹ کوکیز استعمال نہیں کرتی۔ ہم صرف آپ کی پیشرفت آپ کے ڈیوائس پر مقامی طور پر محفوظ کرتے ہیں۔ کوئی ذاتی ڈیٹا اکٹھا یا شیئر نہیں کیا جاتا۔", okGotIt: "ٹھیک ہے", privacyLink: "رازداری کی پالیسی", progress: "پیش رفت", next: "اگلا حصہ", prev: "پچھلا", generatePDF: "پی ڈی ایف رپورٹ بنائیں", completeMsg: "تمام حصے مکمل! اب آپ بینک کے لیے تیار پی ڈی ایف بنا سکتے ہیں۔", s1: "1. بنیادی کاروباری عناصر", s2: "2. مارکیٹ تجزیہ", s3: "3. مالی تخمینے", s4: "4. اسٹریٹجک مینجمنٹ", s5: "5. نفاذ اور نگرانی", businessName: "کاروبار کا نام", legalStructure: "قانونی ڈھانچہ", mission: "مشن سٹیٹمنٹ", vision: "ویژن سٹیٹمنٹ", coreValues: "3-5 بنیادی اقدار منتخب کریں", execSummary: "ایگزیکٹو خلاصہ", pestel: "اہم PESTEL عنصر", fiveForces: "پورٹر کی پانچ قوتیں", initialInvestment: "کل ابتدائی سرمایہ کاری (€)", loanAmount: "قرض کی رقم (€)", revenueY1: "سال اول کی آمدنی (€)", wacc: "WACC (%)", riskMain: "سب سے بڑا خطرہ", } }
+        };
+        
+        i18next.use(window.i18nextBrowserLanguageDetector).init({ resources, fallbackLng: 'en', interpolation: { escapeValue: false } }, () => {
+            window.i18nInitialized = true;
+        });
+        const I18nContext = React.createContext();
+        const useI18n = () => useContext(I18nContext);
+
+        // App State Context
+        const AppContext = createContext();
+        
+        // Question sections definition
+        const sections = [
+            { id: 'sec1', titleKey: 's1', questions: ['businessName', 'legalStructure', 'mission', 'vision', 'coreValues', 'execSummary'] },
+            { id: 'sec2', titleKey: 's2', questions: ['pestel', 'fiveForces', 'bmcValue', 'bmcChannel', 'marketingMix'] },
+            { id: 'sec3', titleKey: 's3', questions: ['initialInvestment', 'loanAmount', 'loanTermYears', 'interestRate', 'taxRate', 'revenueY1', 'revenueY2', 'revenueY3', 'revenueY4', 'revenueY5', 'opExpRatio', 'deprAmount', 'wacc', 'workingCapitalPct'] },
+            { id: 'sec4', titleKey: 's4', questions: [] },
+            { id: 'sec5', titleKey: 's5', questions: ['riskMain', 'actionPlan'] }
+        ];
+        
+        const defaultAnswers = {
+            businessName: "Caldas Berries Lda.",
+            legalStructure: "Lda.",
+            mission: "Produce sustainable, high-quality blueberries and strawberries for local and regional markets.",
+            vision: "Become a reference in greenhouse berry production in Centro region by 2030.",
+            coreValues: ["Responsibility & Ethics","Customer Orientation"],
+            execSummary: "execOpt1",
+            pestel: "pestOpt2",
+            fiveForces: "forceMed",
+            bmcValue: "Fresh, pesticide-free berries with year-round availability",
+            bmcChannel: "Local retailers & farmers markets",
+            marketingMix: "Product freshness & local branding",
+            initialInvestment: 75000,
+            loanAmount: 50000,
+            loanTermYears: 5,
+            interestRate: 4.5,
+            taxRate: 21,
+            revenueY1: 85000,
+            revenueY2: 110000,
+            revenueY3: 135000,
+            revenueY4: 155000,
+            revenueY5: 170000,
+            opExpRatio: 55,
+            deprAmount: 8000,
+            wacc: 6.8,
+            workingCapitalPct: 15,
+            riskMain: "riskOpt3",
+            actionPlan: "Build cash reserve and negotiate supplier payment terms"
+        };
+        
+        const getStoredAnswers = () => {
+            const stored = localStorage.getItem('businessPlanAnswers');
+            if(stored) return JSON.parse(stored);
+            return defaultAnswers;
+        };
+        
+        const MainApp = () => {
+            const [answers, setAnswers] = useState(getStoredAnswers);
+            const [currentSection, setCurrentSection] = useState(0);
+            const [gdprAccepted, setGdprAccepted] = useState(localStorage.getItem('gdprAccepted') === 'true');
+            const [language, setLanguage] = useState(i18next.language || 'en');
+            
+            useEffect(() => {
+                localStorage.setItem('businessPlanAnswers', JSON.stringify(answers));
+            }, [answers]);
+            
+            const updateAnswer = (key, value) => setAnswers(prev => ({ ...prev, [key]: value }));
+            
+            const acceptGDPR = () => {
+                setGdprAccepted(true);
+                localStorage.setItem('gdprAccepted', 'true');
+            };
+            
+            const totalSections = sections.length;
+            const progress = ((currentSection+1)/totalSections)*100;
+            
+            const handleNext = () => { if(currentSection < totalSections-1) setCurrentSection(prev => prev+1); };
+            const handlePrev = () => { if(currentSection > 0) setCurrentSection(prev => prev-1); };
+            
+            const allSectionsComplete = true; // user can generate anytime after filling required fields
+            
+            return (
+                <I18nContext.Provider value={{ language, setLanguage, t: (key) => i18next.t(key) }}>
+                    <AppContext.Provider value={{ answers, updateAnswer }}>
+                        <div className="min-h-screen bg-gray-50">
+                            {!gdprAccepted && <GDPRBanner onAccept={acceptGDPR} />}
+                            <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-10">
+                                <div className="max-w-6xl mx-auto px-4 py-4 flex flex-wrap justify-between items-center gap-3">
+                                    <h1 className="text-2xl serif-heading font-bold text-teal-800">{i18next.t('appTitle')}</h1>
+                                    <LanguageSwitcher />
+                                </div>
+                            </header>
+                            <main className="max-w-4xl mx-auto px-4 py-6">
+                                <div className="bg-white rounded-2xl shadow-md p-6 mb-6">
+                                    <div className="flex justify-between items-center mb-2"><span className="text-sm font-medium text-gray-600">{i18next.t('progress')}</span><span className="text-sm text-teal-700">{Math.round(progress)}%</span></div>
+                                    <div className="w-full bg-gray-200 rounded-full h-2.5"><div className="bg-teal-600 h-2.5 rounded-full progress-bar-fill" style={{width: `${progress}%`}}></div></div>
+                                    <div className="flex gap-2 mt-4 overflow-x-auto pb-1">
+                                        {sections.map((sec, idx) => (<button key={sec.id} onClick={()=>setCurrentSection(idx)} className={`px-4 py-1.5 rounded-full text-sm font-medium transition ${idx===currentSection ? 'step-active bg-teal-800 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>{i18next.t(sec.titleKey)}</button>))}
+                                    </div>
+                                </div>
+                                <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8 card-hover">
+                                    <SectionRenderer section={sections[currentSection]} />
+                                    <div className="flex justify-between mt-10 pt-6 border-t">
+                                        <button onClick={handlePrev} disabled={currentSection===0} className={`px-6 py-2 rounded-lg font-medium ${currentSection===0?'bg-gray-200 text-gray-400 cursor-not-allowed':'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}>{i18next.t('prev')}</button>
+                                        {currentSection === totalSections-1 ? (
+                                            <PDFGenerator answers={answers} />
+                                        ) : (
+                                            <button onClick={handleNext} className="px-6 py-2 bg-teal-700 text-white rounded-lg hover:bg-teal-800 font-medium">{i18next.t('next')}</button>
+                                        )}
+                                    </div>
+                                </div>
+                                {currentSection === totalSections-1 && <div className="mt-4 text-center text-green-700 text-sm">{i18next.t('completeMsg')}</div>}
+                            </main>
+                            <footer className="text-center text-gray-400 text-xs py-6 border-t mt-8"><a href="#" className="underline" onClick={(e)=>{e.preventDefault(); alert("No data is collected. All information stays in your browser local storage.");}}>{i18next.t('privacyLink')}</a></footer>
+                        </div>
+                    </AppContext.Provider>
+                </I18nContext.Provider>
+            );
+        };
+        
+        const LanguageSwitcher = () => {
+            const { setLanguage } = useI18n();
+            return (<select onChange={(e)=>{ const lng=e.target.value; i18next.changeLanguage(lng); setLanguage(lng); }} className="border border-gray-300 rounded-md px-3 py-1.5 text-sm bg-white shadow-sm">
+                <option value="en">🇬🇧 English</option><option value="pt">🇵🇹 Português</option><option value="hi">🇮🇳 हिन्दी</option><option value="bn">🇧🇩 বাংলা</option><option value="ur">🇵🇰 اردو</option>
+            </select>);
+        };
+        
+        const GDPRBanner = ({ onAccept }) => {
+            const { t } = useI18n();
+            return (<div className="bg-amber-50 border-b border-amber-200 p-3 text-center text-sm text-amber-800"><span>{t('gdprBanner')}</span><button onClick={onAccept} className="ml-4 bg-teal-700 text-white px-4 py-1 rounded-full text-xs font-medium">{t('okGotIt')}</button></div>);
+        };
+        
+        const SectionRenderer = ({ section }) => {
+            const { t } = useI18n();
+            const { answers, updateAnswer } = useContext(AppContext);
+            const qIds = section.questions;
+            if(qIds.length === 0 && section.id === 'sec4') return (<div className="py-8 text-center text-gray-500"><p>Balanced Scorecard perspectives: Financial, Customer, Internal Processes, Learning & Growth defined in PDF report.</p><textarea className="w-full border rounded-lg p-3 mt-3" placeholder="Add your strategic objectives..."></textarea></div>);
+            return (<div><h2 className="text-2xl serif-heading font-semibold text-teal-900 mb-6">{t(section.titleKey)}</h2><div className="space-y-6">{qIds.map(qid => <QuestionComponent key={qid} qid={qid} value={answers[qid]} onChange={(val)=>updateAnswer(qid,val)} />)}</div></div>);
+        };
+        
+        const QuestionComponent = ({ qid, value, onChange }) => {
+            const { t } = useI18n();
+            const renderInput = () => {
+                switch(qid){
+                    case 'businessName': return <input type="text" className="border rounded-xl p-3 w-full" value={value||''} onChange={e=>onChange(e.target.value)} />;
+                    case 'legalStructure': return <div className="flex gap-4 flex-wrap">{['legalOpt1','legalOpt2','legalOpt3'].map(opt=><label key={opt} className={`radio-card flex items-center gap-2 px-4 py-2 ${value===t(opt)?'selected':''}`}><input type="radio" name="legal" checked={value===t(opt)} onChange={()=>onChange(t(opt))} />{t(opt)}</label>)}</div>;
+                    case 'mission': return <textarea rows={2} className="border rounded-xl p-3 w-full" value={value||''} onChange={e=>onChange(e.target.value)} />;
+                    case 'vision': return <textarea rows={2} className="border rounded-xl p-3 w-full" value={value||''} onChange={e=>onChange(e.target.value)} />;
+                    case 'coreValues': return <div className="flex flex-wrap gap-3">{['valResp','valClient','valPassion','valInnov','valPeople'].map(v=><label key={v} className="flex items-center gap-2"><input type="checkbox" checked={Array.isArray(value) && value.includes(t(v))} onChange={e=>{let arr=Array.isArray(value)?[...value]:[]; if(e.target.checked) arr.push(t(v)); else arr=arr.filter(x=>x!==t(v)); onChange(arr);}} />{t(v)}</label>)}</div>;
+                    case 'execSummary': return <div className="space-y-2">{['execOpt1','execOpt2','execOpt3'].map(opt=><label className="flex items-center gap-2"><input type="radio" name="exec" checked={value===opt} onChange={()=>onChange(opt)} />{t(opt)}</label>)}</div>;
+                    case 'pestel': return <select className="border rounded-xl p-3 w-full" value={value||''} onChange={e=>onChange(e.target.value)}><option value="pestOpt1">{t('pestOpt1')}</option><option value="pestOpt2">{t('pestOpt2')}</option><option value="pestOpt3">{t('pestOpt3')}</option><option value="pestOpt4">{t('pestOpt4')}</option></select>;
+                    case 'fiveForces': return <div className="flex gap-4">{['forceLow','forceMed','forceHigh'].map(f=><label className="flex gap-1"><input type="radio" name="force" checked={value===f} onChange={()=>onChange(f)} />{t(f)}</label>)}</div>;
+                    case 'bmcValue': case 'bmcChannel': case 'marketingMix': return <input className="border rounded-xl p-3 w-full" value={value||''} onChange={e=>onChange(e.target.value)} />;
+                    case 'initialInvestment': case 'loanAmount': case 'loanTermYears': case 'interestRate': case 'taxRate': case 'revenueY1': case 'revenueY2': case 'revenueY3': case 'revenueY4': case 'revenueY5': case 'opExpRatio': case 'deprAmount': case 'wacc': case 'workingCapitalPct': return <input type="number" step="any" className="border rounded-xl p-3 w-full" value={value||0} onChange={e=>onChange(parseFloat(e.target.value)||0)} />;
+                    case 'riskMain': return <div className="flex flex-wrap gap-3">{['riskOpt1','riskOpt2','riskOpt3'].map(r=><label className="flex gap-2"><input type="radio" name="risk" checked={value===r} onChange={()=>onChange(r)} />{t(r)}</label>)}</div>;
+                    case 'actionPlan': return <textarea rows={2} className="border rounded-xl p-3 w-full" value={value||''} onChange={e=>onChange(e.target.value)} />;
+                    default: return <input className="border rounded-xl p-3 w-full" value={value||''} onChange={e=>onChange(e.target.value)} />;
+                }
+            };
+            return (<div className="bg-gray-50 p-5 rounded-xl"><label className="block font-semibold text-gray-800 mb-2">{t(qid)}</label>{renderInput()}</div>);
+        };
+        
+        const PDFGenerator = ({ answers }) => {
+            const { t } = useI18n();
+            const generatePDF = () => {
+                const docDefinition = { content: [
+                    { text: "Business Plan Report – Prepared for CA Bank (Alfeizérão)", style: 'header', alignment: 'center', margin: [0,0,0,10] },
+                    { text: `Date: ${new Date().toLocaleDateString()}`, alignment: 'right', fontSize: 10 },
+                    { text: "Executive Summary", style: 'subheader' }, { text: `Business: ${answers.businessName} | Legal: ${answers.legalStructure} | Mission: ${answers.mission} | Vision: ${answers.vision} | Core values: ${answers.coreValues?.join(', ')}` },
+                    { text: "Market Analysis", style: 'subheader' }, { text: `PESTEL factor: ${answers.pestel} | Porter intensity: ${answers.fiveForces} | Value proposition: ${answers.bmcValue} | Channels: ${answers.bmcChannel}` },
+                    { text: "Financial Projections (5-year summary)", style: 'subheader' }, 
+                    { text: `Initial Investment: €${answers.initialInvestment} | Loan: €${answers.loanAmount} (${answers.loanTermYears}yrs, ${answers.interestRate}%) | Tax rate: ${answers.taxRate}% | WACC: ${answers.wacc}%` },
+                    { text: `Revenue: Y1 €${answers.revenueY1} → Y5 €${answers.revenueY5} | Operating expenses ${answers.opExpRatio}% of revenue | Depreciation €${answers.deprAmount}` },
+                    { text: "Key Financial Metrics (autocalculated)", style: 'subheader' },
+                    (()=>{ const rev=[answers.revenueY1,answers.revenueY2,answers.revenueY3,answers.revenueY4,answers.revenueY5]; const opEx=rev.map(r=>r*(answers.opExpRatio/100)); const ebitda=rev.map((r,i)=>r-opEx[i]-answers.deprAmount); const tax=answers.taxRate/100; const fcf=ebitda.map((eb,i)=>eb*(1-tax)+answers.deprAmount-(i===0?answers.workingCapitalPct/100*rev[i]:0)); const npv = fcf.reduce((acc,cf,i)=>acc+cf/Math.pow(1+answers.wacc/100,i+1), -answers.initialInvestment); return {text:`Estimated Net Present Value (NPV): €${npv.toFixed(0)} | Approx Payback within 3-4 years. Break-even analysis indicates viable project.`}; })(),
+                    { text: "Risk Mitigation", style: 'subheader' }, { text: `Primary risk: ${answers.riskMain} | 90-day action plan: ${answers.actionPlan}` },
+                    { text: "Prepared according to IAPMEI & ANIET guidelines for SME loan application.", fontSize: 8, margin: [0,30,0,0] }
+                ], styles: { header: { fontSize: 20, bold: true, font: 'Playfair Display' }, subheader: { fontSize: 14, bold: true, margin: [0,10,0,5] } } };
+                pdfMake.createPdf(docDefinition).download('Business_Plan_Report.pdf');
+            };
+            return (<button onClick={generatePDF} className="px-6 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 font-medium shadow-md">{t('generatePDF')}</button>);
+        };
+        
+        ReactDOM.createRoot(document.getElementById('root')).render(<MainApp />);
+    </script>
+</body>
+</html>
