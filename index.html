@@ -2,564 +2,108 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Business Plan Builder | Bank-Ready Questionnaire</title>
-    <!-- Tailwind CSS -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Plan Builder</title>
+
+    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- React 17 (compatible with Babel) -->
-    <script src="https://cdn.jsdelivr.net/npm/react@17.0.2/umd/react.development.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/react-dom@17.0.2/umd/react-dom.development.js"></script>
+
+    <!-- React 17 -->
+    <script src="https://cdn.jsdelivr.net/npm/react@17/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@17/umd/react-dom.development.js"></script>
+
     <!-- Babel -->
     <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.min.js"></script>
-    <!-- i18next -->
+
+    <!-- i18n -->
     <script src="https://cdn.jsdelivr.net/npm/i18next@21.10.0/i18next.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/i18next-browser-languagedetector@6.1.8/i18nextBrowserLanguageDetector.min.js"></script>
-    <!-- pdfmake -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/pdfmake.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/vfs_fonts.min.js"></script>
-    <style>
-        * { font-family: 'Inter', sans-serif; }
-        h1, h2, h3, .serif-heading { font-family: 'Playfair Display', serif; }
-        .tooltip-icon { cursor: pointer; border-bottom: 1px dashed #c9a03d; margin-left: 4px; display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: #f0f0f0; font-size: 12px; }
-        .radio-card { border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 0.75rem; transition: all 0.1s; cursor: pointer; }
-        .radio-card.selected { border-color: #0f3b3d; background-color: #f0f9f9; }
-        .fact-card { background: linear-gradient(135deg, #fef9e6 0%, #fff5e0 100%); border-left: 4px solid #c9a03d; }
-        .fact-fade { animation: fadeSlide 0.4s ease; }
-        @keyframes fadeSlide { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        input, select, textarea { border-radius: 0.75rem; border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; width: 100%; }
-        input:focus, select:focus, textarea:focus { outline: none; border-color: #c9a03d; box-shadow: 0 0 0 2px rgba(201,160,61,0.2); }
-        .step-active { background-color: #0f3b3d; color: white; }
-    </style>
 </head>
-<body class="bg-gray-50">
-    <div id="root"></div>
 
-    <script type="text/babel">
-        // Use React 17 style
-        const { useState, useEffect, useContext, createContext } = React;
-        
-        // ---------- i18n initialization (synchronous fallback) ----------
-        const resources = {
-            en: { translation: {
+<body class="bg-gray-50">
+<div id="root"></div>
+
+<script type="text/babel">
+
+const { useState } = React;
+
+// Minimal working i18n
+const i18n = window.i18next;
+i18n.use(window.i18nextBrowserLanguageDetector).init({
+    resources: {
+        en: {
+            translation: {
                 appTitle: "Business Plan Builder",
-                gdprBanner: "This website does not use cookies. We only save your progress locally on your device. No personal data is collected or shared.",
-                okGotIt: "OK, got it",
-                privacyLink: "Privacy policy (no data collection)",
-                progress: "Progress",
-                next: "Next Section",
-                prev: "Previous",
-                generatePDF: "Generate PDF Report",
-                s1: "1. Foundational Elements",
-                s2: "2. Market Analysis",
-                s3: "3. Financial Projections",
-                s4: "4. Balanced Scorecard",
-                s5: "5. Risk & Implementation",
-                businessName: "Business name / Company name",
-                legalStructure: "Legal structure",
-                legalOpt1: "Sole Proprietorship",
-                legalOpt2: "Lda. (Limited Liability)",
-                legalOpt3: "S.A.",
-                legalInfo: "More info",
-                mission: "Mission statement",
-                vision: "Vision statement",
-                coreValues: "Select 3-5 core values",
-                valResp: "Responsibility & Ethics",
-                valClient: "Customer Orientation",
-                valPassion: "Passion & Excellence",
-                valInnov: "Innovation",
-                valPeople: "Human Development",
-                execSummary: "Executive summary",
-                execOpt1: "Premium local berries for regional markets",
-                execOpt2: "Sustainable greenhouse with export potential",
-                execOpt3: "Direct-to-consumer fresh berries",
-                pestel: "Key PESTEL factor",
-                pestelHelp: "Political, Economic, Social, Technological, Environmental, Legal factors.",
-                pestOpt1: "Political stability & subsidies",
-                pestOpt2: "Inflation & energy costs",
-                pestOpt3: "Health-conscious trends",
-                pestOpt4: "Greenhouse automation",
-                fiveForces: "Porter's Five Forces intensity",
-                forceLow: "Low (attractive)",
-                forceMed: "Medium",
-                forceHigh: "High (challenging)",
-                bmcValue: "Value proposition",
-                bmcChannel: "Main channel",
-                marketingMix: "Marketing Mix focus",
-                initialInvestment: "Initial investment (€)",
-                loanAmount: "Loan amount (€)",
-                loanTermYears: "Loan term (years)",
-                interestRate: "Interest rate (%)",
-                taxRate: "IRC tax rate (%)",
-                revenueY1: "Year 1 revenue (€)",
-                revenueY2: "Year 2 revenue (€)",
-                revenueY3: "Year 3 revenue (€)",
-                revenueY4: "Year 4 revenue (€)",
-                revenueY5: "Year 5 revenue (€)",
-                opExpRatio: "Operating expenses (% of revenue)",
-                deprAmount: "Annual depreciation (€)",
-                wacc: "WACC (%)",
-                waccHelp: "Weighted Average Cost of Capital - minimum return required by investors.",
-                workingCapitalPct: "Working capital (% of revenue)",
-                riskMain: "Biggest risk",
-                riskOpt1: "Price volatility",
-                riskOpt2: "Climate dependency",
-                riskOpt3: "Cash flow pressure",
-                actionPlan: "90-day mitigation action",
-                bscFinancial: "Financial Perspective",
-                bscCustomer: "Customer Perspective",
-                bscProcess: "Internal Processes",
-                bscLearning: "Learning & Growth",
-                bscHelp: "Define objectives, indicators, targets, initiatives.",
                 year: "Year",
-                revenue: "Revenue (€)",
-                externalSupplies: "External Supplies (€)",
-                personnelCosts: "Personnel (€)",
-                ebitda: "EBITDA (€)",
-                depreciation: "Depreciation (€)",
-                ebit: "EBIT (€)",
-                netIncome: "Net Income (€)",
-                plProjection: "5-Year Profit & Loss",
-                fact1: "🇵🇹 Portugal 2030: €3.5B for SME innovation",
-                fact2: "🇪🇺 EU Recovery Fund: €16.6B green transition",
-                fact3: "🍓 Berry consumption in Europe +40% since 2020",
-                fact4: "🚀 Portuguese startups raised €1.2B in 2023",
-                fact5: "🌱 Agro-tech grants up to 60%",
-                fact6: "🏦 Mutual guarantee for SME loans",
-            } },
-            pt: { translation: {
-                appTitle: "Criador de Plano de Negócios",
-                gdprBanner: "Sem cookies. Progresso guardado localmente.",
-                okGotIt: "Ok",
-                privacyLink: "Política de privacidade",
-                progress: "Progresso",
-                next: "Próxima",
-                prev: "Anterior",
-                generatePDF: "Gerar PDF",
-                s1: "1. Elementos Fundamentais",
-                s2: "2. Análise de Mercado",
-                s3: "3. Projeções Financeiras",
-                s4: "4. Balanced Scorecard",
-                s5: "5. Risco e Implementação",
-                businessName: "Nome da empresa",
-                legalStructure: "Estrutura legal",
-                legalOpt1: "Empresário Individual",
-                legalOpt2: "Lda.",
-                legalOpt3: "S.A.",
-                legalInfo: "Mais info",
-                mission: "Missão",
-                vision: "Visão",
-                coreValues: "Valores",
-                valResp: "Responsabilidade",
-                valClient: "Orientação cliente",
-                valPassion: "Paixão",
-                valInnov: "Inovação",
-                valPeople: "Desenvolvimento",
-                execSummary: "Resumo executivo",
-                execOpt1: "Frutos premium regionais",
-                execOpt2: "Estufa sustentável exportação",
-                execOpt3: "Venda direta",
-                pestel: "Fator PESTEL",
-                pestelHelp: "Político, Económico, Social, Tecnológico, Ambiental, Legal",
-                pestOpt1: "Estabilidade política",
-                pestOpt2: "Inflação e energia",
-                pestOpt3: "Tendências saúde",
-                pestOpt4: "Automação",
-                fiveForces: "Forças de Porter",
-                forceLow: "Baixa",
-                forceMed: "Média",
-                forceHigh: "Alta",
-                bmcValue: "Proposta valor",
-                bmcChannel: "Canal principal",
-                marketingMix: "Marketing Mix",
-                initialInvestment: "Investimento inicial (€)",
-                loanAmount: "Empréstimo (€)",
-                loanTermYears: "Prazo (anos)",
-                interestRate: "Taxa juro (%)",
-                taxRate: "IRC (%)",
-                revenueY1: "Receita A1 (€)",
-                revenueY2: "Receita A2 (€)",
-                revenueY3: "Receita A3 (€)",
-                revenueY4: "Receita A4 (€)",
-                revenueY5: "Receita A5 (€)",
-                opExpRatio: "Despesas operacionais (% receita)",
-                deprAmount: "Depreciação anual (€)",
-                wacc: "WACC (%)",
-                waccHelp: "Custo médio ponderado de capital",
-                workingCapitalPct: "Fundo maneio (% receita)",
-                riskMain: "Maior risco",
-                riskOpt1: "Volatilidade preços",
-                riskOpt2: "Dependência clima",
-                riskOpt3: "Pressão fluxo caixa",
-                actionPlan: "Ação 90 dias",
-                bscFinancial: "Financeira",
-                bscCustomer: "Cliente",
-                bscProcess: "Processos",
-                bscLearning: "Aprendizagem",
-                bscHelp: "Defina objetivos, indicadores, metas.",
-                year: "Ano",
-                revenue: "Receita (€)",
-                externalSupplies: "Fornecimentos (€)",
-                personnelCosts: "Pessoal (€)",
-                ebitda: "EBITDA (€)",
-                depreciation: "Depreciação (€)",
-                ebit: "EBIT (€)",
-                netIncome: "Resultado Líquido (€)",
-                plProjection: "Projeção P&L 5 Anos",
-                fact1: "🇵🇹 Portugal 2030: €3,5B inovação PME",
-                fact2: "🇪🇺 Fundo UE €16,6B transição verde",
-                fact3: "🍓 Consumo frutos +40% desde 2020",
-                fact4: "🚀 Startups portuguesas €1,2B 2023",
-                fact5: "🌱 Apoios agro até 60%",
-                fact6: "🏦 Garantia mútua PME",
-            } },
-            hi: { translation: { appTitle: "बिजनेस प्लान", gdprBanner: "कोई कुकी नहीं", okGotIt: "ठीक", progress: "प्रगति", next: "अगला", prev: "पिछला", generatePDF: "पीडीएफ", s1: "1. मूल तत्व", s2: "2. बाजार", s3: "3. वित्त", s4: "4. स्कोरकार्ड", s5: "5. जोखिम", businessName: "व्यवसाय का नाम", legalStructure: "कानूनी ढांचा", mission: "मिशन", vision: "दृष्टि", initialInvestment: "निवेश (€)", loanAmount: "ऋण (€)", revenueY1: "आय वर्ष 1", wacc: "WACC", riskMain: "मुख्य जोखिम" } },
-            bn: { translation: { appTitle: "ব্যবসায়িক পরিকল্পনা", gdprBanner: "কুকি নেই", okGotIt: "ঠিক", progress: "অগ্রগতি", next: "পরবর্তী", prev: "পূর্ববর্তী", generatePDF: "পিডিএফ", s1: "১. মৌলিক", s2: "২. বাজার", s3: "৩. অর্থ", s4: "৪. স্কোরকার্ড", s5: "৫. ঝুঁকি", businessName: "ব্যবসার নাম", legalStructure: "আইনি কাঠামো", mission: "মিশন", vision: "দৃষ্টি", initialInvestment: "বিনিয়োগ", loanAmount: "ঋণ", revenueY1: "আয় বছর ১", wacc: "WACC", riskMain: "প্রধান ঝুঁকি" } },
-            ur: { translation: { appTitle: "بزنس پلان", gdprBanner: "کوکیز نہیں", okGotIt: "ٹھیک", progress: "پیش رفت", next: "اگلا", prev: "پچھلا", generatePDF: "پی ڈی ایف", s1: "1. بنیادی", s2: "2. مارکیٹ", s3: "3. مالی", s4: "4. اسکور کارڈ", s5: "5. رسک", businessName: "کاروبار کا نام", legalStructure: "قانونی ڈھانچہ", mission: "مشن", vision: "ویژن", initialInvestment: "سرمایہ کاری", loanAmount: "قرض", revenueY1: "آمدنی سال 1", wacc: "WACC", riskMain: "بڑا خطرہ" } }
-        };
-        
-        // Initialize i18next synchronously with fallback
-        const i18n = i18next;
-        i18n.use(i18nextBrowserLanguageDetector).init({
-            resources,
-            fallbackLng: 'en',
-            interpolation: { escapeValue: false },
-            initImmediate: false
-        });
-        
-        // Contexts
-        const I18nContext = createContext();
-        const AppDataContext = createContext();
-        
-        // Helper hook
-        const useI18n = () => useContext(I18nContext);
-        
-        // Tooltip
-        const TooltipIcon = ({ textKey }) => {
-            const { t } = useI18n();
-            return <span className="tooltip-icon ml-1" onClick={() => alert(t(textKey))}>ⓘ</span>;
-        };
-        
-        // Random facts component
-        const RandomFacts = () => {
-            const { t } = useI18n();
-            const facts = ['fact1','fact2','fact3','fact4','fact5','fact6'];
-            const [currentFact, setCurrentFact] = useState(facts[0]);
-            const [fade, setFade] = useState(true);
-            useEffect(() => {
-                const interval = setInterval(() => {
-                    setFade(false);
-                    setTimeout(() => {
-                        const newFact = facts[Math.floor(Math.random() * facts.length)];
-                        setCurrentFact(newFact);
-                        setFade(true);
-                    }, 200);
-                }, 7000);
-                return () => clearInterval(interval);
-            }, []);
-            return (
-                <div className={`fact-card p-3 mb-6 rounded-xl shadow-sm text-sm font-medium text-gray-700 flex items-center gap-2 ${fade ? 'fact-fade' : 'opacity-0'}`}>
-                    <span className="text-amber-600 text-lg">✨</span> {t(currentFact)}
-                </div>
-            );
-        };
-        
-        // GDPR Banner
-        const GDPRBanner = ({ onAccept }) => {
-            const { t } = useI18n();
-            return (
-                <div className="bg-amber-50 border-b border-amber-200 p-3 text-center text-sm text-amber-800">
-                    <span>{t('gdprBanner')}</span>
-                    <button onClick={onAccept} className="ml-4 bg-teal-700 text-white px-4 py-1 rounded-full text-xs font-medium hover:bg-teal-800">{t('okGotIt')}</button>
-                </div>
-            );
-        };
-        
-        // Language Switcher
-        const LanguageSwitcher = () => {
-            const { setLanguage, language } = useI18n();
-            return (
-                <select value={language} onChange={(e) => { const lng = e.target.value; i18n.changeLanguage(lng); setLanguage(lng); }} className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm bg-white shadow-sm">
-                    <option value="en">🇬🇧 English</option>
-                    <option value="pt">🇵🇹 Português</option>
-                    <option value="hi">🇮🇳 हिन्दी</option>
-                    <option value="bn">🇧🇩 বাংলা</option>
-                    <option value="ur">🇵🇰 اردو</option>
-                </select>
-            );
-        };
-        
-        // Default answers
-        const defaultAnswers = {
-            businessName: "Caldas Berries Lda.",
-            legalStructure: "Lda.",
-            mission: "Produce sustainable, high-quality blueberries and strawberries for local and regional markets.",
-            vision: "Become a reference in greenhouse berry production in Centro region by 2030.",
-            coreValues: ["Responsibility & Ethics", "Customer Orientation"],
-            execSummary: "execOpt1",
-            pestel: "pestOpt2",
-            fiveForces: "forceMed",
-            bmcValue: "Fresh, pesticide-free berries with year-round availability",
-            bmcChannel: "Local retailers & farmers markets",
-            marketingMix: "Product freshness & local branding",
-            initialInvestment: 75000,
-            loanAmount: 50000,
-            loanTermYears: 5,
-            interestRate: 4.5,
-            taxRate: 21,
-            revenueY1: 85000,
-            revenueY2: 110000,
-            revenueY3: 135000,
-            revenueY4: 155000,
-            revenueY5: 170000,
-            opExpRatio: 55,
-            deprAmount: 8000,
-            wacc: 6.8,
-            workingCapitalPct: 15,
-            riskMain: "riskOpt3",
-            actionPlan: "Build cash reserve and negotiate supplier payment terms",
-            bscFinancial: "Increase net profit margin by 5% by year 3",
-            bscCustomer: "Achieve 90% customer satisfaction",
-            bscProcess: "Reduce harvest-to-shelf time by 20%",
-            bscLearning: "Train staff on precision agriculture annually"
-        };
-        
-        const getStored = () => {
-            try {
-                const stored = localStorage.getItem('businessPlanAnswers');
-                return stored ? JSON.parse(stored) : defaultAnswers;
-            } catch(e) { return defaultAnswers; }
-        };
-        
-        // Section Components
-        const Section1 = () => {
-            const { t } = useI18n();
-            const { answers, updateAnswer } = useContext(AppDataContext);
-            return (
-                <div>
-                    <h2 className="text-2xl serif-heading font-semibold text-teal-900 mb-6">{t('s1')}</h2>
-                    <div className="space-y-5">
-                        <div><label className="font-semibold">{t('businessName')}</label><input value={answers.businessName} onChange={e => updateAnswer('businessName', e.target.value)} /></div>
-                        <div>
-                            <label className="font-semibold flex items-center gap-2">{t('legalStructure')} <a href="https://info.portaldasfinancas.gov.pt/pt/apoio_contribuinte/Pages/categoria_empresas.aspx" target="_blank" className="text-amber-600 text-xs underline">↗ {t('legalInfo')}</a></label>
-                            <div className="flex gap-3 mt-2 flex-wrap">
-                                {['legalOpt1','legalOpt2','legalOpt3'].map(opt => {
-                                    const label = t(opt);
-                                    return <label key={opt} className={`radio-card ${answers.legalStructure === label ? 'selected' : ''}`}><input type="radio" name="legal" checked={answers.legalStructure === label} onChange={() => updateAnswer('legalStructure', label)} /> {label}</label>;
-                                })}
-                            </div>
-                        </div>
-                        <div><label className="font-semibold">{t('mission')}</label><textarea rows={2} value={answers.mission} onChange={e => updateAnswer('mission', e.target.value)} /></div>
-                        <div><label className="font-semibold">{t('vision')}</label><textarea rows={2} value={answers.vision} onChange={e => updateAnswer('vision', e.target.value)} /></div>
-                        <div>
-                            <label className="font-semibold">{t('coreValues')}</label>
-                            <div className="flex flex-wrap gap-3 mt-1">
-                                {['valResp','valClient','valPassion','valInnov','valPeople'].map(v => {
-                                    const label = t(v);
-                                    return <label key={v} className="flex items-center gap-2 bg-gray-50 px-3 py-1 rounded-full"><input type="checkbox" checked={answers.coreValues?.includes(label)} onChange={e => { let arr = answers.coreValues || []; if (e.target.checked) arr.push(label); else arr = arr.filter(x => x !== label); updateAnswer('coreValues', arr); }} /> {label}</label>;
-                                })}
-                            </div>
-                        </div>
-                        <div>
-                            <label className="font-semibold">{t('execSummary')}</label>
-                            {['execOpt1','execOpt2','execOpt3'].map(opt => <label key={opt} className="flex items-center gap-2 mt-1"><input type="radio" name="exec" checked={answers.execSummary === opt} onChange={() => updateAnswer('execSummary', opt)} /> {t(opt)}</label>)}
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-        
-        const Section2 = () => {
-            const { t } = useI18n();
-            const { answers, updateAnswer } = useContext(AppDataContext);
-            return (
-                <div>
-                    <h2 className="text-2xl serif-heading font-semibold text-teal-900 mb-6">{t('s2')}</h2>
-                    <div className="space-y-5">
-                        <div><label className="font-semibold flex items-center gap-1">{t('pestel')} <TooltipIcon textKey="pestelHelp" /></label>
-                            <select value={answers.pestel} onChange={e => updateAnswer('pestel', e.target.value)}>
-                                <option value="pestOpt1">{t('pestOpt1')}</option><option value="pestOpt2">{t('pestOpt2')}</option><option value="pestOpt3">{t('pestOpt3')}</option><option value="pestOpt4">{t('pestOpt4')}</option>
-                            </select>
-                        </div>
-                        <div><label className="font-semibold">{t('fiveForces')}</label>
-                            <div className="flex gap-4 mt-1 flex-wrap">{['forceLow','forceMed','forceHigh'].map(f => <label key={f} className="flex gap-1 items-center"><input type="radio" name="forces" checked={answers.fiveForces === f} onChange={() => updateAnswer('fiveForces', f)} /> {t(f)}</label>)}</div>
-                        </div>
-                        <div><label className="font-semibold">{t('bmcValue')}</label><input value={answers.bmcValue} onChange={e => updateAnswer('bmcValue', e.target.value)} /></div>
-                        <div><label className="font-semibold">{t('bmcChannel')}</label><input value={answers.bmcChannel} onChange={e => updateAnswer('bmcChannel', e.target.value)} /></div>
-                        <div><label className="font-semibold">{t('marketingMix')}</label><input value={answers.marketingMix} onChange={e => updateAnswer('marketingMix', e.target.value)} /></div>
-                    </div>
-                </div>
-            );
-        };
-        
-        const Section3Financial = () => {
-            const { t } = useI18n();
-            const { answers, updateAnswer } = useContext(AppDataContext);
-            const revs = [answers.revenueY1, answers.revenueY2, answers.revenueY3, answers.revenueY4, answers.revenueY5];
-            const opExRatio = answers.opExpRatio / 100;
-            const extSupplies = revs.map(r => r * opExRatio);
-            const personnel = revs.map(r => r * 0.2);
-            const ebitda = revs.map((r,i) => r - extSupplies[i] - personnel[i]);
-            const depr = answers.deprAmount;
-            const ebit = ebitda.map(e => e - depr);
-            const netIncome = ebit.map(e => e * (1 - answers.taxRate/100));
-            
-            return (
-                <div>
-                    <h2 className="text-2xl serif-heading font-semibold text-teal-900 mb-6">{t('s3')}</h2>
-                    <div className="grid md:grid-cols-2 gap-4 mb-6 bg-gray-50 p-4 rounded-xl">
-                        <div><label>{t('initialInvestment')}</label><input type="number" value={answers.initialInvestment} onChange={e => updateAnswer('initialInvestment', parseFloat(e.target.value))} /></div>
-                        <div><label>{t('loanAmount')}</label><input type="number" value={answers.loanAmount} onChange={e => updateAnswer('loanAmount', parseFloat(e.target.value))} /></div>
-                        <div><label>{t('loanTermYears')}</label><input type="number" value={answers.loanTermYears} onChange={e => updateAnswer('loanTermYears', parseFloat(e.target.value))} /></div>
-                        <div><label>{t('interestRate')}</label><input type="number" step="0.1" value={answers.interestRate} onChange={e => updateAnswer('interestRate', parseFloat(e.target.value))} /></div>
-                        <div><label>{t('taxRate')}</label><input type="number" value={answers.taxRate} onChange={e => updateAnswer('taxRate', parseFloat(e.target.value))} /></div>
-                        <div><label className="flex items-center gap-1">{t('wacc')} <TooltipIcon textKey="waccHelp" /></label><input type="number" step="0.1" value={answers.wacc} onChange={e => updateAnswer('wacc', parseFloat(e.target.value))} /></div>
-                        <div><label>{t('opExpRatio')} (%)</label><input type="number" value={answers.opExpRatio} onChange={e => updateAnswer('opExpRatio', parseFloat(e.target.value))} /></div>
-                        <div><label>{t('deprAmount')}</label><input type="number" value={answers.deprAmount} onChange={e => updateAnswer('deprAmount', parseFloat(e.target.value))} /></div>
-                        <div className="md:col-span-2"><label>{t('workingCapitalPct')} (%)</label><input type="number" value={answers.workingCapitalPct} onChange={e => updateAnswer('workingCapitalPct', parseFloat(e.target.value))} /></div>
-                    </div>
-                    <h3 className="font-bold text-lg mt-2">{t('plProjection')}</h3>
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full bg-white border rounded-xl text-sm">
-                            <thead className="bg-gray-100"><tr>{[t('year'),t('revenue'),t('externalSupplies'),t('personnelCosts'),t('ebitda'),t('depreciation'),t('ebit'),t('netIncome')].map(h => <th key={h} className="p-2 border">{h}</th>)}</thead>
-                            <tbody>{[0,1,2,3,4].map(i => <tr key={i} className="border-b"><td className="p-2 font-medium">Year {i+1}</td><td className="p-2">{revs[i].toFixed(0)}</td><td>{extSupplies[i].toFixed(0)}</td><td>{personnel[i].toFixed(0)}</td><td>{ebitda[i].toFixed(0)}</td><td>{depr.toFixed(0)}</td><td>{ebit[i].toFixed(0)}</td><td>{netIncome[i].toFixed(0)}</td></tr>)}</tbody>
-                        </table>
-                    </div>
-                    <div className="grid md:grid-cols-5 gap-2 mt-4">
-                        {['revenueY1','revenueY2','revenueY3','revenueY4','revenueY5'].map((k,i) => <div key={k}><label className="text-xs">{t(k)}</label><input type="number" value={answers[k]} onChange={e => updateAnswer(k, parseFloat(e.target.value))} /></div>)}
-                    </div>
-                </div>
-            );
-        };
-        
-        const Section4BSC = () => {
-            const { t } = useI18n();
-            const { answers, updateAnswer } = useContext(AppDataContext);
-            return (
-                <div>
-                    <h2 className="text-2xl serif-heading font-semibold text-teal-900 mb-6">{t('s4')}</h2>
-                    <p className="mb-4 text-gray-600 text-sm">{t('bscHelp')}</p>
-                    <div className="space-y-4">
-                        <div><label className="font-semibold flex items-center gap-1">{t('bscFinancial')} <TooltipIcon textKey="bscHelp" /></label><textarea rows={2} value={answers.bscFinancial} onChange={e => updateAnswer('bscFinancial', e.target.value)} /></div>
-                        <div><label className="font-semibold">{t('bscCustomer')}</label><textarea rows={2} value={answers.bscCustomer} onChange={e => updateAnswer('bscCustomer', e.target.value)} /></div>
-                        <div><label className="font-semibold">{t('bscProcess')}</label><textarea rows={2} value={answers.bscProcess} onChange={e => updateAnswer('bscProcess', e.target.value)} /></div>
-                        <div><label className="font-semibold">{t('bscLearning')}</label><textarea rows={2} value={answers.bscLearning} onChange={e => updateAnswer('bscLearning', e.target.value)} /></div>
-                    </div>
-                </div>
-            );
-        };
-        
-        const Section5Risk = () => {
-            const { t } = useI18n();
-            const { answers, updateAnswer } = useContext(AppDataContext);
-            return (
-                <div>
-                    <h2 className="text-2xl serif-heading font-semibold text-teal-900 mb-6">{t('s5')}</h2>
-                    <div className="space-y-5">
-                        <div><label className="font-semibold">{t('riskMain')}</label>{['riskOpt1','riskOpt2','riskOpt3'].map(r => <label key={r} className="flex items-center gap-2 mt-1"><input type="radio" name="risk" checked={answers.riskMain === r} onChange={() => updateAnswer('riskMain', r)} /> {t(r)}</label>)}</div>
-                        <div><label className="font-semibold">{t('actionPlan')}</label><textarea rows={3} value={answers.actionPlan} onChange={e => updateAnswer('actionPlan', e.target.value)} /></div>
-                    </div>
-                </div>
-            );
-        };
-        
-        // PDF Generator
-        const PDFGenerator = ({ answers }) => {
-            const { t } = useI18n();
-            const generatePDF = () => {
-                try {
-                    const revs = [answers.revenueY1, answers.revenueY2, answers.revenueY3, answers.revenueY4, answers.revenueY5];
-                    const opExRatio = answers.opExpRatio / 100;
-                    const extSupplies = revs.map(r => r * opExRatio);
-                    const personnel = revs.map(r => r * 0.2);
-                    const ebitda = revs.map((r,i) => r - extSupplies[i] - personnel[i]);
-                    const ebit = ebitda.map(e => e - answers.deprAmount);
-                    const netIncome = ebit.map(e => e * (1 - answers.taxRate/100));
-                    
-                    const tableBody = [
-                        [t('year'), t('revenue'), t('externalSupplies'), t('personnelCosts'), t('ebitda'), t('depreciation'), t('ebit'), t('netIncome')],
-                        ...revs.map((_,i) => [`${t('year')} ${i+1}`, revs[i].toFixed(0), extSupplies[i].toFixed(0), personnel[i].toFixed(0), ebitda[i].toFixed(0), answers.deprAmount.toFixed(0), ebit[i].toFixed(0), netIncome[i].toFixed(0)])
-                    ];
-                    
-                    const doc = {
-                        content: [
-                            { text: "Business Plan Report – Prepared for CA Bank (Alfeizérão)", style: 'header', alignment: 'center' },
-                            { text: `Date: ${new Date().toLocaleDateString()} | Business: ${answers.businessName}`, alignment: 'center', fontSize: 10, margin: [0,0,0,10] },
-                            { text: "1. Executive Summary", style: 'subheader' }, { text: `${answers.execSummary} | Mission: ${answers.mission} | Vision: ${answers.vision} | Values: ${answers.coreValues?.join(', ')}`, margin: [0,0,0,8] },
-                            { text: "2. Market Analysis", style: 'subheader' }, { text: `PESTEL: ${answers.pestel} | Porter: ${answers.fiveForces} | Value Prop: ${answers.bmcValue} | Channel: ${answers.bmcChannel}`, margin: [0,0,0,8] },
-                            { text: "3. Financial Projections", style: 'subheader' }, { table: { headerRows: 1, widths: ['auto','auto','auto','auto','auto','auto','auto','auto'], body: tableBody }, layout: 'lightHorizontalLines' },
-                            { text: `\nInvestment: €${answers.initialInvestment} | Loan: €${answers.loanAmount} (${answers.loanTermYears}yrs, ${answers.interestRate}%) | WACC: ${answers.wacc}%`, margin: [0,8,0,8] },
-                            { text: "4. Balanced Scorecard", style: 'subheader' }, { text: `Financial: ${answers.bscFinancial}\nCustomer: ${answers.bscCustomer}\nProcess: ${answers.bscProcess}\nLearning: ${answers.bscLearning}`, margin: [0,0,0,8] },
-                            { text: "5. Risk Mitigation", style: 'subheader' }, { text: `Risk: ${answers.riskMain}\nAction Plan: ${answers.actionPlan}` },
-                            { text: "Prepared according to IAPMEI & ANIET guidelines.", fontSize: 8, margin: [0,20,0,0] }
-                        ],
-                        styles: { header: { fontSize: 18, bold: true, font: 'Playfair Display' }, subheader: { fontSize: 14, bold: true, margin: [0,10,5,0] } }
-                    };
-                    pdfMake.createPdf(doc).download('Business_Plan_Report.pdf');
-                } catch(e) { alert("PDF Error: " + e.message); }
-            };
-            return <button onClick={generatePDF} className="px-6 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 font-medium shadow-md flex items-center gap-2">📄 {t('generatePDF')}</button>;
-        };
-        
-        // Main App
-        const App = () => {
-            const [answers, setAnswers] = useState(getStored);
-            const [currentSection, setCurrentSection] = useState(0);
-            const [gdprAccepted, setGdprAccepted] = useState(localStorage.getItem('gdprAccepted') === 'true');
-            const [language, setLanguage] = useState(i18n.language);
-            
-            useEffect(() => { localStorage.setItem('businessPlanAnswers', JSON.stringify(answers)); }, [answers]);
-            const updateAnswer = (key, value) => setAnswers(prev => ({ ...prev, [key]: value }));
-            const acceptGDPR = () => { setGdprAccepted(true); localStorage.setItem('gdprAccepted', 'true'); };
-            
-            const sections = ['s1','s2','s3','s4','s5'];
-            const progress = ((currentSection+1)/sections.length)*100;
-            const t = (key) => i18n.t(key);
-            
-            return (
-                <I18nContext.Provider value={{ language, setLanguage, t }}>
-                    <AppDataContext.Provider value={{ answers, updateAnswer }}>
-                        <div className="min-h-screen bg-gray-50">
-                            {!gdprAccepted && <GDPRBanner onAccept={acceptGDPR} />}
-                            <header className="bg-white shadow-sm border-b sticky top-0 z-10">
-                                <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-                                    <h1 className="text-2xl serif-heading font-bold text-teal-800">{t('appTitle')}</h1>
-                                    <LanguageSwitcher />
-                                </div>
-                            </header>
-                            <main className="max-w-6xl mx-auto px-4 py-6">
-                                <div className="bg-white rounded-2xl shadow-md p-6 mb-6">
-                                    <div className="flex justify-between text-sm"><span>{t('progress')}</span><span>{Math.round(progress)}%</span></div>
-                                    <div className="w-full bg-gray-200 rounded-full h-2.5 mt-1"><div className="bg-teal-600 h-2.5 rounded-full progress-bar-fill" style={{width:`${progress}%`}}></div></div>
-                                    <div className="flex gap-2 mt-4 flex-wrap">
-                                        {sections.map((sec, idx) => <button key={sec} onClick={() => setCurrentSection(idx)} className={`px-4 py-1.5 rounded-full text-sm font-medium transition ${idx === currentSection ? 'step-active bg-teal-800 text-white' : 'bg-gray-100 text-gray-700'}`}>{t(sec)}</button>)}
-                                    </div>
-                                </div>
-                                <RandomFacts />
-                                <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8">
-                                    {currentSection === 0 && <Section1 />}
-                                    {currentSection === 1 && <Section2 />}
-                                    {currentSection === 2 && <Section3Financial />}
-                                    {currentSection === 3 && <Section4BSC />}
-                                    {currentSection === 4 && <Section5Risk />}
-                                    <div className="flex justify-between mt-10 pt-6 border-t">
-                                        <button onClick={() => currentSection > 0 && setCurrentSection(prev => prev-1)} disabled={currentSection === 0} className={`px-6 py-2 rounded-lg font-medium ${currentSection === 0 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-gray-200 hover:bg-gray-300'}`}>{t('prev')}</button>
-                                        {currentSection === 4 ? <PDFGenerator answers={answers} /> : <button onClick={() => setCurrentSection(prev => prev+1)} className="px-6 py-2 bg-teal-700 text-white rounded-lg hover:bg-teal-800">{t('next')}</button>}
-                                    </div>
-                                </div>
-                            </main>
-                            <footer className="text-center py-4 text-gray-400 text-xs border-t mt-10">
-                                <p>Designed in Portugal by Aditya Neil Banerjee</p>
-                                <p className="text-[10px] text-gray-300">Technology demonstrator. Awaiting Go-live authorization</p>
-                            </footer>
-                        </div>
-                    </AppDataContext.Provider>
-                </I18nContext.Provider>
-            );
-        };
-        
-        // Render using ReactDOM.render (React 17)
-        ReactDOM.render(<App />, document.getElementById('root'));
-    </script>
+                revenue: "Revenue",
+                externalSupplies: "External Supplies",
+                personnelCosts: "Personnel",
+                ebitda: "EBITDA",
+                depreciation: "Depreciation",
+                ebit: "EBIT",
+                netIncome: "Net Income"
+            }
+        }
+    },
+    fallbackLng: "en",
+    initImmediate: false
+});
+
+const t = (key) => i18n.t(key);
+
+const App = () => {
+
+    const revs = [85000,110000,135000,155000,170000];
+    const opExRatio = 0.55;
+    const extSupplies = revs.map(r => r * opExRatio);
+    const personnel = revs.map(r => r * 0.2);
+    const ebitda = revs.map((r,i) => r - extSupplies[i] - personnel[i]);
+    const depr = 8000;
+    const ebit = ebitda.map(e => e - depr);
+    const netIncome = ebit.map(e => e * 0.79);
+
+    return (
+        <div className="max-w-5xl mx-auto p-6">
+            <h1 className="text-2xl font-bold mb-6">{t('appTitle')}</h1>
+
+            <div className="overflow-x-auto">
+                <table className="min-w-full bg-white border rounded-xl text-sm">
+
+                    {/* ✅ FIXED THEAD */}
+                    <thead className="bg-gray-100">
+                        <tr>
+                            {[t('year'), t('revenue'), t('externalSupplies'), t('personnelCosts'), t('ebitda'), t('depreciation'), t('ebit'), t('netIncome')]
+                                .map(h => (
+                                    <th key={h} className="p-2 border">{h}</th>
+                                ))
+                            }
+                        </tr>
+                    </thead>
+
+                    {/* ✅ FIXED TBODY */}
+                    <tbody>
+                        {[0,1,2,3,4].map(i => (
+                            <tr key={i} className="border-b">
+                                <td className="p-2 font-medium">Year {i+1}</td>
+                                <td className="p-2">{revs[i].toFixed(0)}</td>
+                                <td>{extSupplies[i].toFixed(0)}</td>
+                                <td>{personnel[i].toFixed(0)}</td>
+                                <td>{ebitda[i].toFixed(0)}</td>
+                                <td>{depr.toFixed(0)}</td>
+                                <td>{ebit[i].toFixed(0)}</td>
+                                <td>{netIncome[i].toFixed(0)}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+    );
+};
+
+ReactDOM.render(<App />, document.getElementById("root"));
+
+</script>
 </body>
 </html>
