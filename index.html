@@ -1,3 +1,4 @@
+html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -531,11 +532,11 @@ function FactBanner() {
   );
 }
 
-// ─── MAIN APP ─────────────────────────────────────────────────────────────────
+// ─── MAIN APP (fixed: removed 'export default') ────────────────────────────────────────────────
 const SECTIONS = ['s1','s2','s3','s4','s5'];
 const SECTION_TITLES = { s1:'Sec1', s2:'Sec2', s3:'Sec3', s4:'Sec4', s5:'Sec5' };
 
-export default function App() {
+function App() {
   const [lang, setLang] = useState(()=>{
     const browser = (navigator.language||'en').slice(0,2);
     return TRANS[browser] ? browser : 'en';
@@ -652,3 +653,4 @@ root.render(<App />);
 </script>
 </body>
 </html>
+```
